@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FaShoppingCart } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 
 // Define types for our component
 interface AnnouncementItem {
     id: number;
     text: string;
 }
+interface menuItem {
+    path: string;
+    text: string;
+}
+
 
 const Navbar: React.FC = () => {
     const [isSticky, setIsSticky] = useState<boolean>(false);
@@ -20,6 +27,11 @@ const Navbar: React.FC = () => {
         { id: 2, text: "New summer collection available now!" },
         { id: 3, text: "Use code SAVE20 for 20% off your first order" },
         { id: 4, text: "Limited time offer: Buy one, get one 50% off" }
+    ];
+    const menuItems: menuItem[] = [
+        { path: '/', text: "Home" },
+        { path: '/shop', text: "Shop" },
+        { path: '/sales', text: "Sales" },
     ];
 
     useEffect(() => {
@@ -102,11 +114,11 @@ const Navbar: React.FC = () => {
         <>
             <header className="relative" ref={navbarRef}>
                 {/* Announcement bar with carousel effect */}
-                <div className="bg-black/90 text-white overflow-hidden py-3">
+                <div className="bg-[#647A67] text-white overflow-hidden py-2">
                     <div className="announcement-container max-w-screen-lg mx-auto relative">
                         <div className="announcement-ticker flex" ref={announcementRef}>
                             {announcements.map((item) => (
-                                <div key={item.id} className="announcement-item whitespace-nowrap px-8">
+                                <div key={item.id} className="announcement-item text-sm trans whitespace-nowrap px-8">
                                     {item.text}
                                 </div>
                             ))}
@@ -116,20 +128,24 @@ const Navbar: React.FC = () => {
 
                 {/* Main navigation */}
                 <nav
-                    className={`border-gray-200 bg-black/80 w-full rounded-b-2xl mx-auto max-w-screen-lg
-                    transition-all duration-300 ease-in-out transform
-                    ${isSticky ? 'fixed top-0 left-0 right-0 shadow-md z-50' : ''}
-                    ${!isNavVisible && isSticky ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+                    className={`
+                        absolute z-10 border-gray-200 bg-black/80  max-w-screen-lg w-full
+                        transition-all duration-300 ease-in-out transform left-1/2 -translate-x-1/2 
+                        ${isSticky ? "fixed top-0 shadow-md z-50" : ""}
+                        ${!isNavVisible && isSticky ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}
+                        flex justify-center items-center rounded-b-2xl
+                      `}
                 >
-                    <div className="bg-white/20 flex flex-wrap justify-between items-center mx-auto max-w-screen-lg px-4 md:px-6 lg:px-7 py-4 md:py-6">
-                        <a href="#" className="flex items-center">
-                            <span className="self-center text-xl font-semibold whitespace-nowrap text-black">Store</span>
+                    <div className=" flex flex-wrap justify-between items-center mx-auto max-w-screen-lg px-4 md:px-6 lg:px-7 py-4 md:py-6 w-full">
+                        {/* Logo - centered on mobile, left on desktop */}
+                        <a href="#" className="flex justify-center items-center w-full lg:w-auto lg:justify-start">
+                            <span className="self-center text-xl font-semibold whitespace-nowrap text-white">Store</span>
                         </a>
 
-                        {/* Mobile menu button */}
+                        {/* Mobile menu button - positioned absolutely */}
                         <button
                             type="button"
-                            className="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors duration-200"
+                            className="inline-flex items-center p-2 text-sm text-white rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors duration-200 absolute right-4 top-4"
                             onClick={toggleMobileMenu}
                             aria-controls="mobile-menu"
                             aria-expanded={isMobileMenuOpen}
@@ -140,35 +156,30 @@ const Navbar: React.FC = () => {
                             </svg>
                         </button>
 
-                        {/* Desktop menu */}
+                        {/* Desktop menu - centered */}
                         <div
                             className={`
                                 transition-all duration-300 ease-in-out 
                                 ${isMobileMenuOpen ? 'block max-h-96' : 'max-h-0 lg:max-h-96'} 
-                                w-full lg:block lg:w-auto overflow-hidden
+                                w-full lg:block lg:w-auto overflow-hidden text-center
                             `}
                             id="mobile-menu"
                         >
-                            <ul className="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
-                                <li>
-                                    <a href="#" className="block py-2 pr-4 pl-3 text-white bg-blue-700 rounded lg:bg-transparent lg:text-blue-700 lg:p-0 transition-colors duration-200" aria-current="page">Home</a>
-                                </li>
-                                <li>
-                                    <a href="#" className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700 transition-colors duration-200">Company</a>
-                                </li>
-                                <li>
-                                    <a href="#" className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700 transition-colors duration-200">Marketplace</a>
-                                </li>
-                                <li>
-                                    <a href="#" className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700 transition-colors duration-200">Features</a>
-                                </li>
-                                <li>
-                                    <a href="#" className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700 transition-colors duration-200">Team</a>
-                                </li>
-                                <li>
-                                    <a href="#" className="block py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent transition-colors duration-200">Contact</a>
-                                </li>
+                            <ul className="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0 justify-center">
+                                {menuItems.map((item, index) => (
+                                    <li>
+                                        <a href={item.path} className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700 transition-colors duration-200">{item.text}</a>
+                                    </li>
+                                ))}
                             </ul>
+                        </div>
+                        <div className="flex space-x-4">
+                            <span className="text-xl cursor-pointer text-white hover:text-blue-500">
+                                <FaShoppingCart />
+                            </span>
+                            <span className="text-xl cursor-pointer text-white hover:text-blue-500">
+                                <FaUser />
+                            </span>
                         </div>
                     </div>
                 </nav>
