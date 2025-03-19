@@ -129,23 +129,23 @@ const Navbar: React.FC = () => {
                 {/* Main navigation */}
                 <nav
                     className={`
-                        absolute z-10 border-gray-200 bg-black/80  max-w-screen-lg w-full
+                        ${isSticky ? "fixed top-0 z-50" : ""}
+                        absolute z-10 border border-gray-400/45 bg-white  max-w-screen-lg w-[95%]
                         transition-all duration-300 ease-in-out transform left-1/2 -translate-x-1/2 
-                        ${isSticky ? "fixed top-0 shadow-md z-50" : ""}
                         ${!isNavVisible && isSticky ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}
                         flex justify-center items-center rounded-b-2xl
                       `}
                 >
                     <div className=" flex flex-wrap justify-between items-center mx-auto max-w-screen-lg px-4 md:px-6 lg:px-7 py-4 md:py-6 w-full">
                         {/* Logo - centered on mobile, left on desktop */}
-                        <a href="#" className="flex justify-center items-center w-full lg:w-auto lg:justify-start">
-                            <span className="self-center text-xl font-semibold whitespace-nowrap text-white">Store</span>
+                        <a href="#" className="flex md:justify-center items-center w-full lg:w-auto lg:justify-start">
+                            <span className="self-center text-xl font-semibold whitespace-nowrap">Store</span>
                         </a>
 
                         {/* Mobile menu button - positioned absolutely */}
                         <button
                             type="button"
-                            className="inline-flex items-center p-2 text-sm text-white rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors duration-200 absolute right-4 top-4"
+                            className="inline-flex items-center text-sm  rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none transition-colors duration-200 absolute right-4 top-4"
                             onClick={toggleMobileMenu}
                             aria-controls="mobile-menu"
                             aria-expanded={isMobileMenuOpen}
@@ -165,19 +165,27 @@ const Navbar: React.FC = () => {
                             `}
                             id="mobile-menu"
                         >
-                            <ul className="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0 justify-center">
-                                {menuItems.map((item, index) => (
-                                    <li>
-                                        <a href={item.path} className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700 transition-colors duration-200">{item.text}</a>
-                                    </li>
-                                ))}
+                            <ul className="flex items-center border-b border-gray-300 lg:border-0 mt-6 font-medium lg:space-x-8 lg:mt-0 justify-between">
+                                <div className='flex items-center space-x-8'>
+                                    {menuItems.map((item, index) => (
+                                        <li>
+                                            <a href={item.path} className="block py-3 lg:p-0 transition-colors duration-200">{item.text}</a>
+                                        </li>
+                                    ))}
+                                </div>
+                                <div className="flex space-x-4 md:hidden ">
+                                    <span className="text-xl cursor-pointer  hover:text-gray-600">
+                                        <FaShoppingCart />
+                                    </span>
+                                    <span className="text-xl cursor-pointer hover:text-gray-600">
+                                        <FaUser />
+                                    </span>
+                                </div>
                             </ul>
                         </div>
-                        <div className="flex space-x-4">
-                            <span className="text-xl cursor-pointer text-white hover:text-blue-500">
+                        <div className="hidden md:block">
+                            <span className="flex space-x-4 text-xl cursor-pointer hover:text-gray-600">
                                 <FaShoppingCart />
-                            </span>
-                            <span className="text-xl cursor-pointer text-white hover:text-blue-500">
                                 <FaUser />
                             </span>
                         </div>
