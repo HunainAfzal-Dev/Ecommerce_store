@@ -21,30 +21,31 @@ const CategoryCarousel: React.FC = () => {
         dots: false,
         infinite: true,
         speed: 500,
-        slidesToShow: 6, // Adjust as needed
+        slidesToShow: 8, // Adjust as needed
         slidesToScroll: 1,
         autoplay: true,
+        Loop: true,
         autoplaySpeed: 3000,
         responsive: [
             {
                 breakpoint: 1024,
-                settings: { slidesToShow: 3 },
+                settings: { slidesToShow: 4 },
             },
             {
                 breakpoint: 768,
-                settings: { slidesToShow: 2 },
+                settings: { slidesToShow: 3 },
             },
             {
                 breakpoint: 480,
-                settings: { slidesToShow: 1 },
+                settings: { slidesToShow: 3 },
             },
         ],
     };
 
     return (
-        <div className="mx-auto max-w-screen-lg">
+        <div className="container mx-auto">
             <div>
-                <h1 className="text-4xl font-bold mb-5">Our Categories</h1>
+                <h1 className="mb-6 text-2xl font-bold">Our Categories</h1>
             </div>
             <Slider {...settings}>
                 {categories.map((category) => (
@@ -53,7 +54,7 @@ const CategoryCarousel: React.FC = () => {
                             <img
                                 src={category.imgSrc}
                                 alt={category.name}
-                                className="rounded-full object-cover w-32 h-32 border-[4px] border-[#647a679f]"
+                                className="rounded-full object-cover w-28 md:w-32 md:h-32 border-[4px] border-[#647a679f]"
                             />
                             <p className="text-center mt-2 font-semibold">{category.name}</p>
                         </div>

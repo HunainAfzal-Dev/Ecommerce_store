@@ -130,13 +130,13 @@ const Navbar: React.FC = () => {
                 <nav
                     className={`
                         ${isSticky ? "fixed top-0 z-50" : ""}
-                        absolute z-10 border border-gray-400/45 bg-white  max-w-screen-lg w-[95%]
+                        absolute z-10 border border-gray-400/45 bg-white  container mx-auto w-[95%]
                         transition-all duration-300 ease-in-out transform left-1/2 -translate-x-1/2 
                         ${!isNavVisible && isSticky ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}
                         flex justify-center items-center rounded-b-2xl
                       `}
                 >
-                    <div className=" flex flex-wrap justify-between items-center mx-auto max-w-screen-lg px-4 md:px-6 lg:px-7 py-4 md:py-6 w-full">
+                    <div className=" flex flex-wrap justify-between items-center  px-4 md:px-6 lg:px-7 py-4 md:py-6 w-full">
                         {/* Logo - centered on mobile, left on desktop */}
                         <a href="#" className="flex md:justify-center items-center w-full lg:w-auto lg:justify-start">
                             <span className="self-center text-xl font-semibold whitespace-nowrap">Store</span>
@@ -183,11 +183,16 @@ const Navbar: React.FC = () => {
                                 </div>
                             </ul>
                         </div>
-                        <div className="hidden md:block">
-                            <span className="flex space-x-4 text-xl cursor-pointer hover:text-gray-600">
-                                <FaShoppingCart />
-                                <FaUser />
-                            </span>
+                        <div className=" hidden md:block">
+                            <div className='flex space-x-4'>
+
+                                <span className=" text-xl cursor-pointer hover:text-gray-600">
+                                    <FaShoppingCart />
+                                </span>
+                                <span className='text-xl cursor-pointer hover:text-gray-600'>
+                                    <FaUser />
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </nav>
