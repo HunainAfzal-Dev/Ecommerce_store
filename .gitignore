@@ -1,0 +1,37 @@
+# ===== Dependencies =====
+node_modules/
+
+# ===== Environment Variables =====
+.env
+.env.local
+.env.production
+*.env
+
+# ===== Build Output =====
+dist/
+build/
+*.tsbuildinfo
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== OS Files =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ===== Editor Files =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Test Files =====
+coverage/
+
+# ===== Supabase test script (local diagnostic) =====
+backend/test-supabase.js
+
