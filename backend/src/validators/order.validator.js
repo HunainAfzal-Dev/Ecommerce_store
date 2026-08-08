@@ -28,8 +28,8 @@ const createOrderSchema = Joi.object({
             'any.required': 'City is required'
         }),
 
-    phone: Joi.string()
-        .pattern(/^[0-9+\-\s]{7,20}$/)
+phone: Joi.string()
+        .pattern(/^(\+?[0-9]{2,3}[- ]?)?[0-9]{10,15}$/)
         .required()
         .messages({
             'string.pattern.base': 'Phone number format is invalid',

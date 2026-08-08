@@ -206,8 +206,9 @@ const getAllOrders = async () => {
 const getOrderById = async (orderId, user) => {
     const { data: order, error } = await supabase
         .from('orders')
-        .select(`
+.select(`
             id,
+            user_id,
             total_amount,
             shipping_address,
             city,

@@ -32,10 +32,14 @@ const authMiddleware = async (req, res, next) => {
             );
         }
 
-        // ===== 2️⃣ Verify the token =====
+// ===== 2️⃣ Verify the token =====
         const decoded = await promisify(jwt.verify)(
             token,
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            {
+                // Allow small clock skew between server and token issuer
+                clockTolerance: parseInt(process.env.JWT_CLOCK_TOLERANCE, 10) || 60
+            }
         );
 
         // ===== 3️⃣ Check if user still exists in database =====
