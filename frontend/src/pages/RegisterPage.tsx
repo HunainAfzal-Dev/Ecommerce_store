@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function RegisterPage() {
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState({
     name: '',
@@ -24,39 +26,51 @@ export default function RegisterPage() {
     setError('');
 
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+      const msg = 'Passwords do not match. Please verify.';
+      setError(msg);
+      showToast(msg, 'error');
       return;
     }
 
     setSubmitting(true);
     try {
       await signup(form.name, form.email, form.password);
+      showToast('Welcome to Garments Store! Your account is active.', 'success');
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const msg = err.response?.data?.message || 'Registration failed. Please try again.';
+      setError(msg);
+      showToast(msg, 'error');
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <span className="text-4xl">👕</span>
-          <h1 className="text-2xl font-bold text-gray-900 mt-2">Create Account</h1>
-          <p className="text-gray-500">Join Garments Store today</p>
+    <div className="min-h-[75vh] flex items-center justify-center px-4 py-16">
+      <div className="bg-white border border-stone-200 p-8 sm:p-12 w-full max-w-md space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-stone-500 font-semibold">
+            Join the Atelier
+          </p>
+          <h1 className="font-serif text-3xl text-stone-950 font-normal">
+            Create Account
+          </h1>
+          <p className="text-xs text-stone-500 font-light">
+            Enjoy personalized shopping, order tracking, and private drops.
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-xs">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
+            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+              Full Name *
             </label>
             <input
               type="text"
@@ -64,14 +78,14 @@ export default function RegisterPage() {
               value={form.name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Your name"
+              className="w-full px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-950 rounded-none transition"
+              placeholder="Your full name"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+              Email Address *
             </label>
             <input
               type="email"
@@ -79,14 +93,14 @@ export default function RegisterPage() {
               value={form.email}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="you@example.com"
+              className="w-full px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-950 rounded-none transition"
+              placeholder="name@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+              Password *
             </label>
             <input
               type="password"
@@ -95,14 +109,14 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
               minLength={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-950 rounded-none transition"
               placeholder="At least 6 characters"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
+            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+              Confirm Password *
             </label>
             <input
               type="password"
@@ -111,28 +125,36 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
               minLength={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Repeat password"
+              className="w-full px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-950 rounded-none transition"
+              placeholder="Repeat your password"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 transition"
-          >
-            {submitting ? 'Creating account...' : 'Sign Up'}
-          </button>
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-stone-950 hover:bg-stone-800 disabled:opacity-50 text-white text-xs uppercase tracking-widest font-semibold py-4 transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <>
+                  <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <span>Register</span>
+              )}
+            </button>
+          </div>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <div className="pt-4 border-t border-stone-200 text-center text-xs text-stone-500 font-light">
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-800 font-medium">
-            Login
+          <Link to="/login" className="text-stone-950 font-semibold hover:underline underline-offset-4">
+            Sign In
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
 }
-

@@ -3,11 +3,6 @@ import { userApi } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import type { User } from '../../types';
 
-const roleColors: Record<string, string> = {
-  admin: 'bg-indigo-100 text-indigo-800',
-  customer: 'bg-gray-100 text-gray-800'
-};
-
 export default function AdminUsers() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);

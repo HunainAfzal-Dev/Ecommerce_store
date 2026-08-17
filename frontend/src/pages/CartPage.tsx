@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 
 export default function CartPage() {
   const {
@@ -11,161 +12,193 @@ export default function CartPage() {
     clearCart
   } = useCart();
   const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  const handleRemove = async (id: string, name: string) => {
+    await removeFromCart(id);
+    showToast(`${name} removed from your shopping bag.`, 'info');
+  };
+
+  const handleClear = async () => {
+    await clearCart();
+    showToast('Shopping bag cleared.', 'info');
+  };
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <p className="text-gray-500">Loading cart...</p>
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
+        <p className="text-xs uppercase tracking-widest text-stone-500 font-medium animate-pulse">
+          Reviewing your bag...
+        </p>
       </div>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <p className="text-6xl mb-4">🛒</p>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-        <p className="text-gray-500 mb-8">Browse our collection and add some items!</p>
-        <Link
-          to="/shop"
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition inline-block"
-        >
-          Continue Shopping
-        </Link>
+      <div className="max-w-3xl mx-auto px-4 py-28 text-center space-y-4">
+        <svg className="w-16 h-16 mx-auto text-stone-300 stroke-[1.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        <h1 className="font-serif text-3xl text-stone-900 font-normal">Your Shopping Bag is Empty</h1>
+        <p className="text-xs text-stone-500 font-light max-w-sm mx-auto">
+          You have no items in your shopping bag. Discover our latest garments and essential silhouettes.
+        </p>
+        <div className="pt-4">
+          <Link
+            to="/shop"
+            className="inline-block bg-stone-950 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold px-8 py-3.5 transition"
+          >
+            Explore Collection
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Shopping Cart</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+      {/* Header */}
+      <div className="mb-8 pb-4 border-b border-stone-200 flex items-baseline justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-stone-500">
+            Review
+          </p>
+          <h1 className="font-serif text-3xl sm:text-4xl text-stone-950 font-normal mt-1">
+            Shopping Bag ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'})
+          </h1>
+        </div>
+        <button
+          onClick={handleClear}
+          className="text-xs uppercase tracking-wider text-stone-400 hover:text-red-700 transition"
+        >
+          Clear All
+        </button>
+      </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        {/* Left Column: Bag Items List */}
+        <div className="lg:col-span-8 divide-y divide-stone-200">
           {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-lg shadow p-4 flex gap-4"
-            >
-              {/* Product Image */}
+            <div key={item.id} className="py-6 first:pt-0 flex gap-4 sm:gap-6">
+              {/* Product Thumbnail */}
               <Link
                 to={`/product/${item.products.id}`}
-                className="w-24 h-24 bg-gray-100 rounded overflow-hidden shrink-0"
+                className="w-24 sm:w-28 aspect-[3/4] bg-[#f5f4f0] border border-stone-200 shrink-0 overflow-hidden"
               >
                 {item.products.image_url ? (
                   <img
                     src={item.products.image_url}
                     alt={item.products.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl">
-                    👕
+                  <div className="w-full h-full flex items-center justify-center text-stone-400">
+                    <svg className="w-8 h-8 stroke-[1.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
                   </div>
                 )}
               </Link>
 
-              {/* Product Info */}
-              <div className="flex-1">
-                <Link
-                  to={`/product/${item.products.id}`}
-                  className="font-semibold text-gray-900 hover:text-indigo-600"
-                >
-                  {item.products.name}
-                </Link>
-                <p className="text-sm text-gray-500 mt-1">
-                  Rs. {item.products.price.toLocaleString()} each
-                </p>
+              {/* Product Info & Controls */}
+              <div className="flex-1 flex flex-col justify-between py-1">
+                <div className="space-y-1">
+                  <div className="flex justify-between items-start gap-2">
+                    <Link
+                      to={`/product/${item.products.id}`}
+                      className="font-serif text-base sm:text-lg text-stone-900 hover:text-stone-600 transition"
+                    >
+                      {item.products.name}
+                    </Link>
+                    <span className="font-semibold text-sm sm:text-base text-stone-900 shrink-0">
+                      Rs. {(item.products.price * item.quantity).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-xs text-stone-500 font-light">
+                    Unit Price: Rs. {item.products.price.toLocaleString()}
+                  </p>
+                </div>
 
-                <div className="mt-3 flex items-center justify-between">
-                  {/* Quantity controls */}
-                  <div className="flex items-center border border-gray-300 rounded-lg">
+                <div className="flex items-center justify-between pt-4">
+                  {/* Quantity Stepper */}
+                  <div className="inline-flex items-center border border-stone-300 bg-white">
                     <button
-                      onClick={() =>
-                        updateQuantity(item.id, Math.max(1, item.quantity - 1))
-                      }
-                      className="px-3 py-1 hover:bg-gray-100 transition"
+                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                      className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition text-sm"
+                      aria-label="Decrease quantity"
                     >
                       −
                     </button>
-                    <span className="px-4 py-1">{item.quantity}</span>
+                    <span className="w-8 text-center text-xs font-semibold text-stone-900">
+                      {item.quantity}
+                    </span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="px-3 py-1 hover:bg-gray-100 transition"
+                      className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition text-sm"
+                      aria-label="Increase quantity"
                     >
                       +
                     </button>
                   </div>
 
-                  {/* Remove */}
+                  {/* Remove Button */}
                   <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    onClick={() => handleRemove(item.id, item.products.name)}
+                    className="text-xs uppercase tracking-wider text-stone-400 hover:text-stone-900 transition underline underline-offset-4"
                   >
                     Remove
                   </button>
                 </div>
               </div>
-
-              {/* Item Total */}
-              <div className="text-right shrink-0">
-                <span className="font-bold text-gray-900">
-                  Rs. {(item.products.price * item.quantity).toLocaleString()}
-                </span>
-              </div>
             </div>
           ))}
-
-          <button
-            onClick={clearCart}
-            className="text-red-600 hover:text-red-800 text-sm font-medium"
-          >
-            Clear Cart
-          </button>
         </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6 sticky top-24">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
+        {/* Right Column: Order Summary Card */}
+        <div className="lg:col-span-4">
+          <div className="bg-white border border-stone-200 p-6 sm:p-8 space-y-6 sticky top-28">
+            <h2 className="font-serif text-xl text-stone-950 font-normal pb-4 border-b border-stone-200">
+              Order Summary
+            </h2>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Subtotal</span>
-                <span className="font-medium text-gray-900">
+            <div className="space-y-3 text-xs">
+              <div className="flex justify-between text-stone-600 font-light">
+                <span>Subtotal</span>
+                <span className="font-semibold text-stone-900">
                   Rs. {cartTotal.toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Shipping</span>
-                <span className="font-medium text-gray-900">Calculated at checkout</span>
-              </div>
-              <div className="border-t pt-3 flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span className="text-indigo-600">
-                  Rs. {cartTotal.toLocaleString()}
+              <div className="flex justify-between text-stone-600 font-light">
+                <span>Shipping Estimate</span>
+                <span className="text-emerald-700 font-medium">
+                  {cartTotal >= 5000 ? 'Complimentary' : 'Calculated at checkout'}
                 </span>
+              </div>
+              <div className="pt-3 border-t border-stone-200 flex justify-between text-sm sm:text-base font-semibold text-stone-950">
+                <span>Estimated Total</span>
+                <span>Rs. {cartTotal.toLocaleString()}</span>
               </div>
             </div>
 
             <button
               onClick={() => navigate('/checkout')}
-              className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+              className="w-full bg-stone-950 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold py-4 transition-all duration-200"
             >
-              Proceed to Checkout
+              Proceed to Checkout &rarr;
             </button>
 
-            <Link
-              to="/shop"
-              className="block text-center mt-3 text-indigo-600 hover:text-indigo-800 text-sm"
-            >
-              Continue Shopping
-            </Link>
+            <div className="pt-2 text-center">
+              <Link
+                to="/shop"
+                className="text-xs uppercase tracking-wider text-stone-500 hover:text-stone-900 transition"
+              >
+                &larr; Continue Browsing
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
