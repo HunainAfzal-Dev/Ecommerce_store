@@ -35,29 +35,29 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-16">
-      <div className="bg-white border border-stone-200 p-8 sm:p-12 w-full max-w-md space-y-8">
+      <div className="bg-white border border-stone-200/90 rounded-2xl p-8 sm:p-10 w-full max-w-md space-y-6 shadow-xs">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-stone-500 font-semibold">
+        <div className="text-center space-y-1.5">
+          <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
             Member Access
-          </p>
-          <h1 className="font-serif text-3xl text-stone-950 font-normal">
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
             Sign In
           </h1>
-          <p className="text-xs text-stone-500 font-light">
-            Enter your credentials to access your garments account.
+          <p className="text-xs text-stone-500 font-normal">
+            Enter your email and password to access your garments account.
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-xs">
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-xs font-medium">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-700 mb-2">
+            <label className="block text-xs uppercase tracking-wider font-bold text-stone-700 mb-1.5">
               Email Address *
             </label>
             <input
@@ -66,13 +66,13 @@ export default function LoginPage() {
               value={form.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-950 rounded-none transition"
+              className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
               placeholder="name@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-700 mb-2">
+            <label className="block text-xs uppercase tracking-wider font-bold text-stone-700 mb-1.5">
               Password *
             </label>
             <input
@@ -81,7 +81,7 @@ export default function LoginPage() {
               value={form.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-950 rounded-none transition"
+              className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
               placeholder="••••••••"
             />
           </div>
@@ -90,7 +90,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-stone-950 hover:bg-stone-800 disabled:opacity-50 text-white text-xs uppercase tracking-widest font-semibold py-4 transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-3.5 rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>
@@ -104,9 +104,9 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="pt-4 border-t border-stone-200 text-center text-xs text-stone-500 font-light">
+        <div className="pt-3 border-t border-stone-100 text-center text-xs text-stone-500 font-normal">
           Don't have an account?{' '}
-          <Link to="/register" className="text-stone-950 font-semibold hover:underline underline-offset-4">
+          <Link to="/register" className="text-[var(--color-accent)] font-bold hover:underline underline-offset-4">
             Create Account
           </Link>
         </div>

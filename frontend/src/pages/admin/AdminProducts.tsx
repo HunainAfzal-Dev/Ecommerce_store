@@ -135,7 +135,7 @@ export default function AdminProducts() {
         resetForm();
         setShowModal(true);
       }}
-      className="bg-stone-950 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold px-5 py-3 transition"
+      className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs uppercase tracking-wider font-bold px-4 py-2.5 rounded-lg shadow-sm transition"
     >
       + New Garment
     </button>
@@ -149,14 +149,14 @@ export default function AdminProducts() {
     >
       <div className="space-y-6">
         {/* Search / Filter Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-stone-200 p-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-stone-200/90 rounded-xl p-4 shadow-xs">
           <div className="relative w-full sm:w-80">
             <input
               type="text"
               placeholder="Search products by title or department..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 rounded-none"
+              className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)]"
             />
             <svg
               className="w-4 h-4 text-stone-400 absolute left-3 top-2.5"
@@ -167,7 +167,7 @@ export default function AdminProducts() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <span className="text-xs text-stone-500 font-light">
+          <span className="text-xs text-stone-500 font-normal">
             Showing {filteredProducts.length} of {products.length} garments
           </span>
         </div>
@@ -176,16 +176,16 @@ export default function AdminProducts() {
         {loading ? (
           <Loader message="Loading garments catalog..." />
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-white border border-stone-200 p-16 text-center space-y-3">
-            <p className="font-serif text-2xl text-stone-400">No Garments Found</p>
-            <p className="text-xs text-stone-500 font-light">
+          <div className="bg-white border border-stone-200/90 rounded-xl p-16 text-center space-y-3 shadow-xs">
+            <p className="text-2xl font-bold text-stone-400">No Garments Found</p>
+            <p className="text-xs text-stone-500 font-normal">
               {searchFilter ? 'Try clearing your search query.' : 'Click "+ New Garment" to add your first product.'}
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-stone-200 overflow-x-auto">
+          <div className="bg-white border border-stone-200/90 rounded-xl overflow-x-auto shadow-xs">
             <table className="min-w-full divide-y divide-stone-200 text-xs text-left">
-              <thead className="bg-[#faf9f6] text-stone-500 uppercase tracking-widest text-[10px] font-semibold">
+              <thead className="bg-[var(--color-surface-subtle)] text-stone-500 uppercase tracking-wider text-[10px] font-bold">
                 <tr>
                   <th className="px-6 py-4">Garment</th>
                   <th className="px-6 py-4">Department</th>
@@ -195,12 +195,12 @@ export default function AdminProducts() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-200 font-light text-stone-800">
+              <tbody className="divide-y divide-stone-200 font-normal text-stone-800">
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-stone-50/70 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-13 bg-[#f5f4f0] border border-stone-200 shrink-0 overflow-hidden">
+                        <div className="w-10 h-12 bg-[#f7f5f1] border border-stone-200 rounded-md shrink-0 overflow-hidden">
                           {product.image_url ? (
                             <img
                               src={product.image_url}
@@ -213,31 +213,31 @@ export default function AdminProducts() {
                             </div>
                           )}
                         </div>
-                        <span className="font-medium text-stone-950 truncate max-w-xs">{product.name}</span>
+                        <span className="font-bold text-stone-950 truncate max-w-xs">{product.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-stone-600">
+                    <td className="px-6 py-4 text-stone-600 font-medium">
                       {product.categories?.name || '—'}
                     </td>
-                    <td className="px-6 py-4 font-medium text-stone-950">
+                    <td className="px-6 py-4 font-bold text-stone-950">
                       Rs. {product.price.toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
                       {product.stock_quantity <= 0 ? (
-                        <span className="text-red-700 font-medium">0 (Out of stock)</span>
+                        <span className="text-red-700 font-bold">0 (Out of stock)</span>
                       ) : product.stock_quantity <= 3 ? (
-                        <span className="text-amber-700 font-medium">{product.stock_quantity} (Low)</span>
+                        <span className="text-[var(--color-warning)] font-bold">{product.stock_quantity} (Low)</span>
                       ) : (
-                        <span className="text-stone-700">{product.stock_quantity}</span>
+                        <span className="text-stone-700 font-medium">{product.stock_quantity}</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       {product.is_active ? (
-                        <span className="inline-block px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200">
+                        <span className="inline-block px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold text-[var(--color-success)] bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-md">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-block px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold text-stone-600 bg-stone-100 border border-stone-200">
+                        <span className="inline-block px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold text-stone-600 bg-stone-100 border border-stone-200 rounded-md">
                           Draft
                         </span>
                       )}
@@ -245,13 +245,13 @@ export default function AdminProducts() {
                     <td className="px-6 py-4 text-right space-x-3">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="text-stone-900 hover:text-stone-600 font-semibold uppercase tracking-wider text-[11px]"
+                        className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-bold uppercase tracking-wider text-[11px]"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(product.id, product.name)}
-                        className="text-red-600 hover:text-red-800 font-semibold uppercase tracking-wider text-[11px]"
+                        className="text-red-600 hover:text-red-800 font-bold uppercase tracking-wider text-[11px]"
                       >
                         Delete
                       </button>
@@ -267,9 +267,9 @@ export default function AdminProducts() {
       {/* Add / Edit Product Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white border border-stone-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between pb-4 border-b border-stone-200">
-              <h2 className="font-serif text-2xl text-stone-950 font-normal">
+          <div className="bg-white border border-stone-200 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-xl animate-fade-in">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <h2 className="text-xl font-bold text-stone-950">
                 {editingId ? 'Edit Garment' : 'New Garment'}
               </h2>
               <button
@@ -281,14 +281,14 @@ export default function AdminProducts() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-xs">
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-xs font-medium">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                   Garment Title *
                 </label>
                 <input
@@ -297,14 +297,14 @@ export default function AdminProducts() {
                   value={form.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                   placeholder="e.g. Linen Relaxed Kurta"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                     Department / Category *
                   </label>
                   <select
@@ -312,7 +312,7 @@ export default function AdminProducts() {
                     value={form.category_id}
                     onChange={handleChange}
                     required
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                   >
                     <option value="">Select Department</option>
                     {categories.map((cat) => (
@@ -324,7 +324,7 @@ export default function AdminProducts() {
                 </div>
 
                 <div>
-                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                     Price in PKR (Rs.) *
                   </label>
                   <input
@@ -335,7 +335,7 @@ export default function AdminProducts() {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                     placeholder="e.g. 4500"
                   />
                 </div>
@@ -343,7 +343,7 @@ export default function AdminProducts() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                     Stock Quantity *
                   </label>
                   <input
@@ -353,20 +353,20 @@ export default function AdminProducts() {
                     onChange={handleChange}
                     required
                     min="0"
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                     placeholder="e.g. 25"
                   />
                 </div>
 
                 <div>
-                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                     Visibility Status
                   </label>
                   <select
                     name="is_active"
                     value={String(form.is_active)}
                     onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                   >
                     <option value="true">Active (Publicly Visible)</option>
                     <option value="false">Draft (Hidden)</option>
@@ -375,7 +375,7 @@ export default function AdminProducts() {
               </div>
 
               <div>
-                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                   Garment Photography URL
                 </label>
                 <input
@@ -384,12 +384,12 @@ export default function AdminProducts() {
                   value={form.image_url}
                   onChange={handleChange}
                   placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                 />
               </div>
 
               <div>
-                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                <label className="block uppercase tracking-wider font-bold text-stone-700 mb-1.5">
                   Garment Narrative / Description
                 </label>
                 <textarea
@@ -398,22 +398,22 @@ export default function AdminProducts() {
                   onChange={handleChange}
                   rows={3}
                   placeholder="Details regarding cut, weave, and silhouette..."
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-[var(--color-primary)]"
                 />
               </div>
 
-              <div className="pt-4 border-t border-stone-200 flex justify-end gap-3">
+              <div className="pt-4 border-t border-stone-100 flex justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="border border-stone-300 text-stone-700 uppercase tracking-wider font-semibold px-5 py-3 hover:bg-stone-50 transition"
+                  className="border border-stone-300 text-stone-700 uppercase tracking-wider font-bold px-4 py-2.5 rounded-lg hover:bg-stone-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-stone-950 hover:bg-stone-800 disabled:opacity-50 text-white uppercase tracking-widest font-semibold px-6 py-3 transition flex items-center gap-2"
+                  className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:opacity-50 text-white uppercase tracking-wider font-bold px-5 py-2.5 rounded-lg shadow-sm transition flex items-center gap-2"
                 >
                   {saving ? 'Saving...' : editingId ? 'Update Garment' : 'Create Garment'}
                 </button>
