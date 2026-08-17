@@ -81,14 +81,14 @@ export default function AdminUsers() {
     >
       <div className="space-y-6">
         {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-stone-200 p-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-stone-200/90 rounded-xl p-4 shadow-xs">
           <div className="relative w-full sm:w-80">
             <input
               type="text"
               placeholder="Search by client name or email..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 rounded-none"
+              className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)]"
             />
             <svg
               className="w-4 h-4 text-stone-400 absolute left-3 top-2.5"
@@ -99,7 +99,7 @@ export default function AdminUsers() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <span className="text-xs text-stone-500 font-light">
+          <span className="text-xs text-stone-500 font-normal">
             Showing {filteredUsers.length} of {users.length} accounts
           </span>
         </div>
@@ -108,16 +108,16 @@ export default function AdminUsers() {
         {loading ? (
           <Loader message="Loading accounts..." />
         ) : filteredUsers.length === 0 ? (
-          <div className="bg-white border border-stone-200 p-16 text-center space-y-3">
-            <p className="font-serif text-2xl text-stone-400">No Accounts Found</p>
-            <p className="text-xs text-stone-500 font-light">
+          <div className="bg-white border border-stone-200/90 rounded-xl p-16 text-center space-y-3 shadow-xs">
+            <p className="text-2xl font-bold text-stone-400">No Accounts Found</p>
+            <p className="text-xs text-stone-500 font-normal">
               No registered users match your search query.
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-stone-200 overflow-x-auto">
+          <div className="bg-white border border-stone-200/90 rounded-xl overflow-x-auto shadow-xs">
             <table className="min-w-full divide-y divide-stone-200 text-xs text-left">
-              <thead className="bg-[#faf9f6] text-stone-500 uppercase tracking-widest text-[10px] font-semibold">
+              <thead className="bg-[var(--color-surface-subtle)] text-stone-500 uppercase tracking-wider text-[10px] font-bold">
                 <tr>
                   <th className="px-6 py-4">Account Member</th>
                   <th className="px-6 py-4">Email</th>
@@ -126,25 +126,25 @@ export default function AdminUsers() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-200 font-light text-stone-800">
+              <tbody className="divide-y divide-stone-200 font-normal text-stone-800">
                 {filteredUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-stone-50/70 transition">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center font-serif text-xs font-semibold shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                           {u.name.charAt(0).toUpperCase()}
                         </div>
-                        <div className="font-medium text-stone-950 flex items-center gap-2">
+                        <div className="font-bold text-stone-950 flex items-center gap-2">
                           <span>{u.name}</span>
                           {u.id === currentUser?.id && (
-                            <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-semibold bg-stone-100 text-stone-800 border border-stone-200">
+                            <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[var(--color-accent-border)] rounded-md">
                               You
                             </span>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-stone-600">
+                    <td className="px-6 py-4 text-stone-600 font-medium">
                       {u.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -152,7 +152,7 @@ export default function AdminUsers() {
                         value={u.role}
                         disabled={saving === u.id || u.id === currentUser?.id}
                         onChange={(e) => handleRoleChange(u.id, e.target.value, u.name)}
-                        className="px-2.5 py-1.5 bg-white border border-stone-300 text-stone-900 text-xs focus:outline-none focus:border-stone-950 rounded-none disabled:opacity-50"
+                        className="px-2.5 py-1.5 bg-white border border-stone-300 rounded-lg text-stone-900 text-xs focus:outline-none focus:border-[var(--color-primary)] font-semibold disabled:opacity-50"
                       >
                         <option value="customer">Customer</option>
                         <option value="admin">Administrator</option>
@@ -163,14 +163,14 @@ export default function AdminUsers() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-stone-500 whitespace-nowrap">
+                    <td className="px-6 py-4 text-stone-500 whitespace-nowrap font-normal">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <button
                         onClick={() => handleDelete(u)}
                         disabled={u.id === currentUser?.id}
-                        className="text-red-600 hover:text-red-800 font-semibold uppercase tracking-wider text-[11px] disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="text-red-600 hover:text-red-800 font-bold uppercase tracking-wider text-[11px] disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         Delete
                       </button>
