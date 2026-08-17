@@ -5,6 +5,7 @@ import { productApi } from '../api/client';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { getCategoryTheme } from '../components/ProductCard';
 import type { Product } from '../types';
 
 export default function ProductDetailPage() {
@@ -74,20 +75,21 @@ export default function ProductDetailPage() {
   }
 
   const isOutOfStock = product.stock_quantity <= 0;
+  const categoryTheme = getCategoryTheme(product.categories?.name);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center space-x-2 text-xs font-medium text-stone-400 mb-8 overflow-x-auto">
-        <Link to="/" className="hover:text-[var(--color-accent)] transition shrink-0">Home</Link>
+        <Link to="/" className="hover:text-stone-900 transition shrink-0">Home</Link>
         <span>/</span>
-        <Link to="/shop" className="hover:text-[var(--color-accent)] transition shrink-0">Shop</Link>
+        <Link to="/shop" className="hover:text-stone-900 transition shrink-0">Shop</Link>
         {product.categories && (
           <>
             <span>/</span>
             <Link
               to={`/shop?category=${product.categories.id}`}
-              className="hover:text-[var(--color-accent)] transition shrink-0"
+              className={`hover:underline transition shrink-0 font-semibold ${categoryTheme.text}`}
             >
               {product.categories.name}
             </Link>
@@ -121,14 +123,19 @@ export default function ProductDetailPage() {
 
         {/* Right Column: Detailed Product Info & Actions Panel */}
         <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-xl p-6 sm:p-8 space-y-6 shadow-xs">
-          {/* Header & Price */}
+          {/* Header & Price with Dashboard Category Accent */}
           <div className="space-y-2 pb-4 border-b border-stone-100">
-            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] bg-[var(--color-accent-light)] px-2.5 py-1 rounded-md border border-[var(--color-accent-border)]">
-              {product.categories?.name || 'Garments Collection'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${categoryTheme.text} ${categoryTheme.bg} px-3 py-1 rounded-md border ${categoryTheme.border}`}>
+                <span className={`w-2 h-2 rounded-full ${categoryTheme.dot}`}></span>
+                {product.categories?.name || 'Garments Collection'}
+              </span>
+            </div>
+            
             <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
               {product.name}
             </h1>
+            
             <div className="pt-2 flex items-baseline gap-3">
               <span className="text-2xl font-extrabold text-stone-950 tracking-tight">
                 Rs. {product.price.toLocaleString()}
@@ -147,7 +154,7 @@ export default function ProductDetailPage() {
             ) : product.stock_quantity <= 3 ? (
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-warning)] bg-[var(--color-warning-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-warning-border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-warning)] animate-pulse"></span>
-                Low Stock — Only {product.stock_quantity} left
+                Low Stock — Only {product.stock_quantity} pieces remaining
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-success)] bg-[var(--color-success-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-success-border)]">
@@ -159,7 +166,7 @@ export default function ProductDetailPage() {
 
           {/* Description */}
           <div className="text-sm text-stone-600 leading-relaxed font-normal">
-            <p>{product.description || 'Crafted with premium breathable fibers for effortless comfort, versatile styling, and long-lasting durability.'}</p>
+            <p>{product.description || 'Crafted with premium breathable natural fibers for effortless comfort, versatile styling, and long-lasting durability.'}</p>
           </div>
 
           {/* Quantity Selector & Add to Bag */}
@@ -217,39 +224,39 @@ export default function ProductDetailPage() {
                 onClick={() => setActiveTab('details')}
                 className={`pb-2.5 transition-colors relative ${
                   activeTab === 'details'
-                    ? 'text-[var(--color-accent)] font-bold'
+                    ? 'text-stone-950 font-bold'
                     : 'text-stone-400 hover:text-stone-700'
                 }`}
               >
                 Details & Fit
                 {activeTab === 'details' && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-accent)] rounded-full" />
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('care')}
                 className={`pb-2.5 transition-colors relative ${
                   activeTab === 'care'
-                    ? 'text-[var(--color-accent)] font-bold'
+                    ? 'text-stone-950 font-bold'
                     : 'text-stone-400 hover:text-stone-700'
                 }`}
               >
                 Fabric & Care
                 {activeTab === 'care' && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-accent)] rounded-full" />
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('shipping')}
                 className={`pb-2.5 transition-colors relative ${
                   activeTab === 'shipping'
-                    ? 'text-[var(--color-accent)] font-bold'
+                    ? 'text-stone-950 font-bold'
                     : 'text-stone-400 hover:text-stone-700'
                 }`}
               >
                 Delivery & Returns
                 {activeTab === 'shipping' && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-accent)] rounded-full" />
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
                 )}
               </button>
             </div>
