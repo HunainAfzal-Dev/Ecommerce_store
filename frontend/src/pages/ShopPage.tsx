@@ -56,9 +56,9 @@ export default function ShopPage() {
   const activeCategoryName = categories.find((c) => c.id === activeCategory)?.name;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
       {/* Page Header */}
-      <div className="mb-8 pb-6 border-b border-stone-200">
+      <div className="mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-stone-200">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
@@ -69,17 +69,17 @@ export default function ShopPage() {
             </h1>
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar with 44px+ touch target */}
           <div className="relative w-full md:w-80">
             <input
               type="text"
               placeholder="Search garments by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
+              className="w-full pl-10 pr-10 py-3 bg-white border border-stone-300 rounded-xl text-xs sm:text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition min-h-[44px]"
             />
             <svg
-              className="w-4 h-4 text-stone-400 absolute left-3 top-3"
+              className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -89,8 +89,9 @@ export default function ShopPage() {
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-2.5 top-2.5 text-stone-400 hover:text-stone-700 p-0.5 text-xs"
+                className="w-8 h-8 flex items-center justify-center absolute right-2 top-2 text-stone-400 hover:text-stone-700 rounded-lg text-xs"
                 title="Clear search"
+                aria-label="Clear search"
               >
                 ✕
               </button>
@@ -98,14 +99,14 @@ export default function ShopPage() {
           </div>
         </div>
 
-        {/* Category Filters Bar */}
-        <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {/* Category Filter Pills - smooth mobile horizontal scroll */}
+        <div className="mt-4 sm:mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => handleCategoryChange('')}
-            className={`shrink-0 px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition-all ${
+            className={`shrink-0 min-h-[38px] px-4 py-2 rounded-xl text-xs uppercase tracking-wider font-bold transition-all ${
               activeCategory === ''
                 ? 'bg-[var(--color-primary)] text-white shadow-xs'
-                : 'bg-white border border-stone-200 text-stone-700 hover:border-stone-400'
+                : 'bg-white border border-stone-200 text-stone-700 active:bg-stone-100 hover:border-stone-400'
             }`}
           >
             All Pieces ({products.length})
@@ -115,10 +116,10 @@ export default function ShopPage() {
             <button
               key={category.id}
               onClick={() => handleCategoryChange(category.id)}
-              className={`shrink-0 px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition-all ${
+              className={`shrink-0 min-h-[38px] px-4 py-2 rounded-xl text-xs uppercase tracking-wider font-bold transition-all ${
                 activeCategory === category.id
                   ? 'bg-[var(--color-primary)] text-white shadow-xs'
-                  : 'bg-white border border-stone-200 text-stone-700 hover:border-stone-400'
+                  : 'bg-white border border-stone-200 text-stone-700 active:bg-stone-100 hover:border-stone-400'
               }`}
             >
               {category.name}
@@ -132,23 +133,23 @@ export default function ShopPage() {
         {loading ? (
           <Loader message="Loading catalog..." />
         ) : products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            {products.map((product, idx) => (
+              <ProductCard key={product.id} product={product} index={idx} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white border border-stone-200 rounded-xl p-8 shadow-xs">
-            <p className="text-2xl font-bold text-stone-700 mb-2">No Pieces Found</p>
+          <div className="text-center py-16 bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs">
+            <p className="text-xl sm:text-2xl font-bold text-stone-700 mb-2">No Pieces Found</p>
             <p className="text-xs text-stone-500 font-normal max-w-sm mx-auto mb-6">
-              We could not find any garments matching your current search criteria or category filter.
+              We could not find any garments matching your search criteria or category filter.
             </p>
             <button
               onClick={() => {
                 setSearch('');
                 handleCategoryChange('');
               }}
-              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3 rounded-lg transition"
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] text-white text-xs uppercase tracking-wider font-bold px-6 py-3.5 rounded-xl transition"
             >
               Reset Filters
             </button>

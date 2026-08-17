@@ -66,7 +66,7 @@ export default function ProductDetailPage() {
         <p className="text-xs text-stone-500 mb-6">{error || 'This piece is currently unavailable.'}</p>
         <button
           onClick={() => navigate('/shop')}
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3 rounded-lg transition"
+          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3.5 rounded-lg transition"
         >
           Return to Shop
         </button>
@@ -78,9 +78,9 @@ export default function ProductDetailPage() {
   const categoryTheme = getCategoryTheme(product.categories?.name);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      {/* Breadcrumb Navigation */}
-      <nav className="flex items-center space-x-2 text-xs font-medium text-stone-400 mb-8 overflow-x-auto">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 pb-24 sm:pb-12">
+      {/* Breadcrumb Navigation - scrollable on small screens without breaking */}
+      <nav className="flex items-center space-x-2 text-xs font-medium text-stone-400 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
         <Link to="/" className="hover:text-stone-900 transition shrink-0">Home</Link>
         <span>/</span>
         <Link to="/shop" className="hover:text-stone-900 transition shrink-0">Shop</Link>
@@ -96,14 +96,14 @@ export default function ProductDetailPage() {
           </>
         )}
         <span>/</span>
-        <span className="text-stone-800 font-semibold truncate">{product.name}</span>
+        <span className="text-stone-800 font-semibold truncate max-w-[160px] sm:max-w-none">{product.name}</span>
       </nav>
 
-      {/* Balanced 2-Column Product Layout with Controlled Image Size */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* Left Column: Controlled Sized Image Presentation */}
-        <div className="lg:col-span-5">
-          <div className="relative aspect-[4/5] max-h-[480px] w-full bg-[#f7f5f1] border border-stone-200 rounded-xl overflow-hidden shadow-xs mx-auto">
+      {/* Balanced 2-Column Product Layout with Responsive Sizing */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
+        {/* Left Column: Responsive Controlled Image Presentation */}
+        <div className="lg:col-span-5 w-full">
+          <div className="relative aspect-[4/5] max-h-[380px] sm:max-h-[480px] w-full bg-[#f7f5f1] border border-stone-200 rounded-2xl overflow-hidden shadow-xs mx-auto">
             {product.image_url ? (
               <img
                 src={product.image_url}
@@ -122,7 +122,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Right Column: Detailed Product Info & Actions Panel */}
-        <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-xl p-6 sm:p-8 space-y-6 shadow-xs">
+        <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-2xl p-5 sm:p-8 space-y-6 shadow-xs">
           {/* Header & Price with Dashboard Category Accent */}
           <div className="space-y-2 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
@@ -136,8 +136,8 @@ export default function ProductDetailPage() {
               {product.name}
             </h1>
             
-            <div className="pt-2 flex items-baseline gap-3">
-              <span className="text-2xl font-extrabold text-stone-950 tracking-tight">
+            <div className="pt-2 flex flex-wrap items-baseline gap-2 sm:gap-3">
+              <span className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
                 Rs. {product.price.toLocaleString()}
               </span>
               <span className="text-xs text-stone-500">Taxes & standard duties included</span>
@@ -169,29 +169,29 @@ export default function ProductDetailPage() {
             <p>{product.description || 'Crafted with premium breathable natural fibers for effortless comfort, versatile styling, and long-lasting durability.'}</p>
           </div>
 
-          {/* Quantity Selector & Add to Bag */}
+          {/* Quantity Selector & Add to Bag (min 44px touch targets) */}
           {!isOutOfStock && (
             <div className="space-y-4 pt-4 border-t border-stone-100">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between sm:justify-start gap-4">
                 <label className="text-xs uppercase tracking-wider font-bold text-stone-700">
                   Quantity:
                 </label>
-                <div className="inline-flex items-center border border-stone-300 rounded-lg bg-stone-50 overflow-hidden">
+                <div className="inline-flex items-center border border-stone-300 rounded-xl bg-stone-50 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition font-bold"
+                    className="w-11 h-11 flex items-center justify-center text-stone-700 active:bg-stone-200 transition text-base font-bold"
                     aria-label="Decrease quantity"
                   >
                     −
                   </button>
-                  <span className="w-10 text-center text-xs font-bold text-stone-900 bg-white h-9 flex items-center justify-center">
+                  <span className="w-12 text-center text-sm font-extrabold text-stone-900 bg-white h-11 flex items-center justify-center border-x border-stone-200">
                     {quantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
-                    className="w-9 h-9 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition font-bold"
+                    className="w-11 h-11 flex items-center justify-center text-stone-700 active:bg-stone-200 transition text-base font-bold"
                     aria-label="Increase quantity"
                   >
                     +
@@ -203,7 +203,7 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={adding}
-                className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-4 rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2"
+                className="w-full min-h-[50px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-4 px-4 rounded-xl shadow-sm transition-all duration-150 flex items-center justify-center gap-2"
               >
                 {adding ? (
                   <>
@@ -217,12 +217,12 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Information Tabs */}
-          <div className="pt-6 border-t border-stone-100">
-            <div className="flex border-b border-stone-200 text-xs font-bold gap-6">
+          {/* Information Tabs - touch-friendly */}
+          <div className="pt-4 border-t border-stone-100">
+            <div className="flex border-b border-stone-200 text-xs font-bold gap-4 sm:gap-6 overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setActiveTab('details')}
-                className={`pb-2.5 transition-colors relative ${
+                className={`py-3 transition-colors relative shrink-0 ${
                   activeTab === 'details'
                     ? 'text-stone-950 font-bold'
                     : 'text-stone-400 hover:text-stone-700'
@@ -235,7 +235,7 @@ export default function ProductDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab('care')}
-                className={`pb-2.5 transition-colors relative ${
+                className={`py-3 transition-colors relative shrink-0 ${
                   activeTab === 'care'
                     ? 'text-stone-950 font-bold'
                     : 'text-stone-400 hover:text-stone-700'
@@ -248,7 +248,7 @@ export default function ProductDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab('shipping')}
-                className={`pb-2.5 transition-colors relative ${
+                className={`py-3 transition-colors relative shrink-0 ${
                   activeTab === 'shipping'
                     ? 'text-stone-950 font-bold'
                     : 'text-stone-400 hover:text-stone-700'
@@ -283,6 +283,31 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Sticky Bottom Action Bar for instant 1-tap checkout/add to cart on phones */}
+      {!isOutOfStock && (
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 shadow-lg flex items-center justify-between gap-3 animate-fade-in">
+          <div className="min-w-0 flex flex-col">
+            <span className="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Total</span>
+            <span className="text-base font-extrabold text-stone-950 truncate">
+              Rs. {(product.price * quantity).toLocaleString()}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={adding}
+            className="flex-1 min-h-[44px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.98] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2"
+          >
+            {adding ? (
+              <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+            ) : (
+              <span>Add to Bag</span>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
