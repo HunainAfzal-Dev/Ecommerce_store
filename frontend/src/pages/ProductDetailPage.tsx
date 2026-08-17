@@ -61,11 +61,11 @@ export default function ProductDetailPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <p className="text-4xl text-stone-300 font-bold mb-3">404</p>
-        <h2 className="text-xl font-semibold text-stone-900 mb-2">Garment Not Found</h2>
+        <h2 className="text-xl font-bold text-stone-900 mb-2">Garment Not Found</h2>
         <p className="text-xs text-stone-500 mb-6">{error || 'This piece is currently unavailable.'}</p>
         <button
           onClick={() => navigate('/shop')}
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-widest font-semibold px-6 py-3 rounded-lg transition"
+          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3 rounded-lg transition"
         >
           Return to Shop
         </button>
@@ -123,10 +123,10 @@ export default function ProductDetailPage() {
         <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-xl p-6 sm:p-8 space-y-6 shadow-xs">
           {/* Header & Price */}
           <div className="space-y-2 pb-4 border-b border-stone-100">
-            <span className="inline-block text-xs font-semibold uppercase tracking-wider text-[var(--color-accent)] bg-[var(--color-accent-light)] px-2.5 py-1 rounded-md border border-[var(--color-accent-border)]">
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] bg-[var(--color-accent-light)] px-2.5 py-1 rounded-md border border-[var(--color-accent-border)]">
               {product.categories?.name || 'Garments Collection'}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-950 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
               {product.name}
             </h1>
             <div className="pt-2 flex items-baseline gap-3">
@@ -137,20 +137,20 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Stock Availability */}
+          {/* Semantic Stock Availability */}
           <div>
             {isOutOfStock ? (
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-700 bg-red-50 px-3 py-1.5 rounded-lg border border-red-200">
-                <span className="w-2 h-2 rounded-full bg-red-600"></span>
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-danger)] bg-[var(--color-danger-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-danger-border)]">
+                <span className="w-2 h-2 rounded-full bg-[var(--color-danger)]"></span>
                 Sold Out
               </div>
             ) : product.stock_quantity <= 3 ? (
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-warning)] bg-[var(--color-warning-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-warning-border)]">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-warning)] bg-[var(--color-warning-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-warning-border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-warning)] animate-pulse"></span>
                 Low Stock — Only {product.stock_quantity} left
               </div>
             ) : (
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-success)] bg-[var(--color-success-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-success-border)]">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-success)] bg-[var(--color-success-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-success-border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-success)]"></span>
                 In Stock ({product.stock_quantity} available)
               </div>
@@ -166,14 +166,14 @@ export default function ProductDetailPage() {
           {!isOutOfStock && (
             <div className="space-y-4 pt-4 border-t border-stone-100">
               <div className="flex items-center gap-4">
-                <label className="text-xs uppercase tracking-wider font-semibold text-stone-700">
+                <label className="text-xs uppercase tracking-wider font-bold text-stone-700">
                   Quantity:
                 </label>
                 <div className="inline-flex items-center border border-stone-300 rounded-lg bg-stone-50 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition font-semibold"
+                    className="w-9 h-9 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition font-bold"
                     aria-label="Decrease quantity"
                   >
                     −
@@ -184,7 +184,7 @@ export default function ProductDetailPage() {
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
-                    className="w-9 h-9 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition font-semibold"
+                    className="w-9 h-9 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition font-bold"
                     aria-label="Increase quantity"
                   >
                     +
@@ -196,7 +196,7 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={adding}
-                className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 text-white text-xs uppercase tracking-widest font-bold py-4 rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2"
+                className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-4 rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2"
               >
                 {adding ? (
                   <>
@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
 
           {/* Information Tabs */}
           <div className="pt-6 border-t border-stone-100">
-            <div className="flex border-b border-stone-200 text-xs font-semibold gap-6">
+            <div className="flex border-b border-stone-200 text-xs font-bold gap-6">
               <button
                 onClick={() => setActiveTab('details')}
                 className={`pb-2.5 transition-colors relative ${
@@ -257,7 +257,7 @@ export default function ProductDetailPage() {
             <div className="py-4 text-xs text-stone-600 leading-relaxed font-normal">
               {activeTab === 'details' && (
                 <ul className="space-y-1.5 list-disc list-inside">
-                  <li>Tailored from premium breathable fibers</li>
+                  <li>Tailored from premium breathable natural fibers</li>
                   <li>Reinforced internal seams for extended durability</li>
                   <li>Modern relaxed silhouette for versatile styling</li>
                 </ul>

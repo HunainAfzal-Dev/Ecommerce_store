@@ -94,7 +94,7 @@ export default function AdminCategories() {
             </h2>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-xs font-medium">
+              <div className="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] text-[var(--color-danger)] px-4 py-3 rounded-lg text-xs font-medium">
                 {error}
               </div>
             )}
@@ -132,7 +132,7 @@ export default function AdminCategories() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold px-5 py-2.5 rounded-lg shadow-sm transition"
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold px-5 py-2.5 rounded-lg shadow-sm transition"
               >
                 {saving ? 'Saving...' : editingId ? 'Update' : 'Add Department'}
               </button>
@@ -173,8 +173,11 @@ export default function AdminCategories() {
                 <tbody className="divide-y divide-stone-200 font-normal text-stone-800">
                   {categories.map((category) => (
                     <tr key={category.id} className="hover:bg-stone-50/70 transition">
-                      <td className="px-6 py-4 font-bold text-stone-950">
-                        {category.name}
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1.5 font-bold text-stone-950">
+                          <span className="w-2 h-2 rounded-full bg-[var(--color-special)]"></span>
+                          {category.name}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-stone-500 max-w-xs truncate">
                         {category.description || '—'}
@@ -182,13 +185,13 @@ export default function AdminCategories() {
                       <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
                         <button
                           onClick={() => handleEdit(category)}
-                          className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-bold uppercase tracking-wider text-[11px]"
+                          className="text-[var(--color-info)] hover:text-[var(--color-info-hover)] font-bold uppercase tracking-wider text-[11px]"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(category.id, category.name)}
-                          className="text-red-600 hover:text-red-800 font-bold uppercase tracking-wider text-[11px]"
+                          className="text-[var(--color-danger)] hover:text-[var(--color-danger-hover)] font-bold uppercase tracking-wider text-[11px]"
                         >
                           Delete
                         </button>

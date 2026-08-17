@@ -127,56 +127,69 @@ export default function AdminUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200 font-normal text-stone-800">
-                {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-stone-50/70 transition">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                          {u.name.charAt(0).toUpperCase()}
+                {filteredUsers.map((u) => {
+                  const isAdmin = u.role === 'admin';
+                  return (
+                    <tr key={u.id} className="hover:bg-stone-50/70 transition">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs ${
+                            isAdmin
+                              ? 'bg-[var(--color-special)] text-white'
+                              : 'bg-[var(--color-primary)] text-white'
+                          }`}>
+                            {u.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="font-bold text-stone-950 flex items-center gap-2">
+                            <span>{u.name}</span>
+                            {u.id === currentUser?.id && (
+                              <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[var(--color-accent-border)] rounded-md">
+                                You
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="font-bold text-stone-950 flex items-center gap-2">
-                          <span>{u.name}</span>
-                          {u.id === currentUser?.id && (
-                            <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[var(--color-accent-border)] rounded-md">
-                              You
+                      </td>
+                      <td className="px-6 py-4 text-stone-600 font-medium">
+                        {u.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={u.role}
+                            disabled={saving === u.id || u.id === currentUser?.id}
+                            onChange={(e) => handleRoleChange(u.id, e.target.value, u.name)}
+                            className={`px-2.5 py-1.5 border rounded-lg text-xs font-semibold focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50 ${
+                              isAdmin
+                                ? 'bg-[var(--color-special-bg)] text-[var(--color-special)] border-[var(--color-special-border)]'
+                                : 'bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info-border)]'
+                            }`}
+                          >
+                            <option value="customer">Customer</option>
+                            <option value="admin">Administrator</option>
+                          </select>
+                          {saving === u.id && (
+                            <span className="text-[10px] text-stone-400 animate-pulse">
+                              Saving...
                             </span>
                           )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-stone-600 font-medium">
-                      {u.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={u.role}
-                        disabled={saving === u.id || u.id === currentUser?.id}
-                        onChange={(e) => handleRoleChange(u.id, e.target.value, u.name)}
-                        className="px-2.5 py-1.5 bg-white border border-stone-300 rounded-lg text-stone-900 text-xs focus:outline-none focus:border-[var(--color-primary)] font-semibold disabled:opacity-50"
-                      >
-                        <option value="customer">Customer</option>
-                        <option value="admin">Administrator</option>
-                      </select>
-                      {saving === u.id && (
-                        <span className="ml-2 text-[10px] text-stone-400 animate-pulse">
-                          Saving...
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-stone-500 whitespace-nowrap font-normal">
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="px-6 py-4 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => handleDelete(u)}
-                        disabled={u.id === currentUser?.id}
-                        className="text-red-600 hover:text-red-800 font-bold uppercase tracking-wider text-[11px] disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 text-stone-500 whitespace-nowrap font-normal">
+                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => handleDelete(u)}
+                          disabled={u.id === currentUser?.id}
+                          className="text-[var(--color-danger)] hover:text-[var(--color-danger-hover)] font-bold uppercase tracking-wider text-[11px] disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
