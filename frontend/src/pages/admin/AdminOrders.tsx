@@ -7,12 +7,37 @@ import type { Order } from '../../types';
 
 const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
-const statusStyles: Record<string, { bg: string; text: string; border: string }> = {
-  pending: { bg: 'bg-[var(--color-warning-bg)]', text: 'text-[var(--color-warning)]', border: 'border-[var(--color-warning-border)]' },
-  processing: { bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-200' },
-  shipped: { bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-200' },
-  delivered: { bg: 'bg-[var(--color-success-bg)]', text: 'text-[var(--color-success)]', border: 'border-[var(--color-success-border)]' },
-  cancelled: { bg: 'bg-stone-100', text: 'text-stone-600', border: 'border-stone-200' }
+const statusStyles: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  pending: {
+    bg: 'bg-[var(--color-warning-bg)]',
+    text: 'text-[var(--color-warning)]',
+    border: 'border-[var(--color-warning-border)]',
+    dot: 'bg-[var(--color-warning)]'
+  },
+  processing: {
+    bg: 'bg-[var(--color-info-bg)]',
+    text: 'text-[var(--color-info)]',
+    border: 'border-[var(--color-info-border)]',
+    dot: 'bg-[var(--color-info)]'
+  },
+  shipped: {
+    bg: 'bg-[var(--color-special-bg)]',
+    text: 'text-[var(--color-special)]',
+    border: 'border-[var(--color-special-border)]',
+    dot: 'bg-[var(--color-special)]'
+  },
+  delivered: {
+    bg: 'bg-[var(--color-success-bg)]',
+    text: 'text-[var(--color-success)]',
+    border: 'border-[var(--color-success-border)]',
+    dot: 'bg-[var(--color-success)]'
+  },
+  cancelled: {
+    bg: 'bg-[var(--color-danger-bg)]',
+    text: 'text-[var(--color-danger)]',
+    border: 'border-[var(--color-danger-border)]',
+    dot: 'bg-[var(--color-danger)]'
+  }
 };
 
 export default function AdminOrders() {
@@ -76,17 +101,20 @@ export default function AdminOrders() {
           </button>
           {statusOptions.map((status) => {
             const count = orders.filter((o) => o.status === status).length;
+            const style = statusStyles[status];
+            const isSelected = filterStatus === status;
             return (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`shrink-0 px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition ${
-                  filterStatus === status
-                    ? 'bg-[var(--color-primary)] text-white shadow-xs'
+                className={`shrink-0 px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition flex items-center gap-2 ${
+                  isSelected
+                    ? `${style.bg} ${style.text} border ${style.border} shadow-xs`
                     : 'bg-white border border-stone-200 text-stone-700 hover:border-stone-400'
                 }`}
               >
-                {status} ({count})
+                <span className={`w-2 h-2 rounded-full ${style.dot}`}></span>
+                <span>{status} ({count})</span>
               </button>
             );
           })}
@@ -119,8 +147,9 @@ export default function AdminOrders() {
                           #{order.id.slice(0, 8)}
                         </span>
                         <span
-                          className={`inline-block px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-md border ${currentStyle.bg} ${currentStyle.text} ${currentStyle.border}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-md border ${currentStyle.bg} ${currentStyle.text} ${currentStyle.border}`}
                         >
+                          <span className={`w-1.5 h-1.5 rounded-full ${currentStyle.dot}`}></span>
                           {order.status}
                         </span>
                       </div>
@@ -133,7 +162,7 @@ export default function AdminOrders() {
                       <p className="text-xl sm:text-2xl font-extrabold text-stone-950 tracking-tight">
                         Rs. {order.total_amount.toLocaleString()}
                       </p>
-                      <p className="text-[11px] text-[var(--color-success)] font-semibold">Delivery Included</p>
+                      <p className="text-[11px] text-[var(--color-success)] font-semibold">Standard Shipping Included</p>
                     </div>
                   </div>
 

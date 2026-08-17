@@ -3,50 +3,99 @@
 @layer base {
   :root {
     /* ============================================================
-       CENTRALIZED BRAND THEME SYSTEM
+       CENTRALIZED SEMANTIC COLOR SYSTEM
        Modify any token here to update the entire application.
        ============================================================ */
-    --color-primary: #1c1917;         /* Deep rich charcoal for main actions */
-    --color-primary-hover: #292524;   /* Primary hover state */
-    --color-primary-light: #f5f4f0;   /* Light primary tint */
 
-    --color-accent: #9c5b3c;          /* Warm Terracotta / Cognac luxury accent */
-    --color-accent-hover: #834b30;    /* Accent hover state */
-    --color-accent-light: #fcf6f3;    /* Soft accent background tint */
-    --color-accent-border: #eddcd3;   /* Accent border tint */
+    /* 1. Base Neutral Colors */
+    --color-background: #faf8f5;          /* Warm off-white / alabaster */
+    --color-surface: #ffffff;             /* Crisp white card surface */
+    --color-surface-hover: #f7f5f1;       /* Light surface hover */
+    --color-surface-subtle: #f4f1ea;      /* Subtle section background */
 
-    --color-background: #faf8f5;      /* Warm off-white / alabaster canvas */
-    --color-surface: #ffffff;         /* Pure white surface / card background */
-    --color-surface-hover: #f7f5f1;   /* Surface hover tint */
-    --color-surface-subtle: #f4f1ea;  /* Subtle section background */
+    --color-text: #1c1917;                /* High contrast text */
+    --color-text-secondary: #57534e;      /* Readable medium text */
+    --color-text-muted: #78716c;          /* Subtle supporting text */
 
-    --color-text: #1c1917;            /* High contrast primary text */
-    --color-text-secondary: #57534e;  /* Readable medium supporting text */
-    --color-text-muted: #78716c;      /* Subtle muted text */
+    --color-border: #e7e5e4;              /* Soft neutral border */
+    --color-border-hover: #d6d3d1;        /* Border on hover */
+    --color-border-dark: #a8a29e;         /* Medium dark border */
 
-    --color-border: #e7e5e4;          /* Soft border */
-    --color-border-hover: #d6d3d1;    /* Border on hover */
-    --color-border-dark: #a8a29e;     /* Medium dark border */
+    /* 2. Brand Core */
+    --color-primary: #1c1917;             /* Deep rich obsidian for primary actions */
+    --color-primary-hover: #292524;       /* Primary hover */
+    --color-primary-light: #f5f4f0;       /* Primary tint */
 
-    --color-success: #15803d;         /* Forest emerald */
-    --color-success-bg: #f0fdf4;
-    --color-success-border: #bbf7d0;
+    --color-accent: #9c5b3c;              /* Warm Terracotta / Cognac luxury accent */
+    --color-accent-hover: #834b30;        /* Accent hover */
+    --color-accent-light: #fcf6f3;        /* Soft accent tint */
+    --color-accent-border: #eddcd3;       /* Accent border tint */
 
-    --color-warning: #b45309;         /* Warm amber */
+    /* 3. Semantic Status & Feedback */
+    /* Success: Positive, Delivered, In Stock, Active */
+    --color-success: #059669;
+    --color-success-hover: #047857;
+    --color-success-bg: #ecfdf5;
+    --color-success-border: #a7f3d0;
+
+    /* Warning: Pending, Low Stock, Attention */
+    --color-warning: #d97706;
+    --color-warning-hover: #b45309;
     --color-warning-bg: #fffbeb;
     --color-warning-border: #fde68a;
 
-    --color-error: #b91c1c;           /* Crimson */
-    --color-error-bg: #fef2f2;
-    --color-error-border: #fecaca;
+    /* Danger: Cancelled, Sold Out, Errors, Destructive Actions */
+    --color-danger: #dc2626;
+    --color-danger-hover: #b91c1c;
+    --color-danger-bg: #fef2f2;
+    --color-danger-border: #fecaca;
 
-    /* Border Radius Tokens */
-    --radius-sm: 0.375rem;            /* 6px */
-    --radius-md: 0.5rem;              /* 8px */
-    --radius-lg: 0.75rem;             /* 12px */
-    --radius-xl: 1rem;                /* 16px */
+    /* Info: Processing, Client Roles, Informational notes */
+    --color-info: #2563eb;
+    --color-info-hover: #1d4ed8;
+    --color-info-bg: #eff6ff;
+    --color-info-border: #bfdbfe;
 
-    /* Typography Tokens */
+    /* Special / Admin / Shipped: Purple / Indigo */
+    --color-special: #7c3aed;
+    --color-special-hover: #6d28d9;
+    --color-special-bg: #f5f3ff;
+    --color-special-border: #ddd6fe;
+
+    /* 4. Dashboard KPI / Analytics Visual Accents */
+    /* Products Metric: Sophisticated Indigo/Blue */
+    --color-stat-products: #2563eb;
+    --color-stat-products-bg: #eff6ff;
+    --color-stat-products-border: #bfdbfe;
+
+    /* Categories Metric: Refined Violet/Purple */
+    --color-stat-categories: #7c3aed;
+    --color-stat-categories-bg: #f5f3ff;
+    --color-stat-categories-border: #ddd6fe;
+
+    /* Orders Metric: Warm Amber/Orange */
+    --color-stat-orders: #d97706;
+    --color-stat-orders-bg: #fffbeb;
+    --color-stat-orders-border: #fde68a;
+
+    /* Users Metric: Refined Teal */
+    --color-stat-users: #0d9488;
+    --color-stat-users-bg: #f0fdfa;
+    --color-stat-users-border: #99f6e4;
+
+    /* Revenue Metric: Premium Emerald */
+    --color-stat-revenue: #059669;
+    --color-stat-revenue-bg: #ecfdf5;
+    --color-stat-revenue-border: #a7f3d0;
+
+    /* 5. Border Radius Tokens */
+    --radius-sm: 0.375rem;                /* 6px */
+    --radius-md: 0.5rem;                  /* 8px */
+    --radius-lg: 0.75rem;                 /* 12px */
+    --radius-xl: 1rem;                    /* 16px */
+    --radius-2xl: 1.25rem;                /* 20px */
+
+    /* 6. Typography */
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-serif: 'Playfair Display', Georgia, serif;
   }
@@ -63,7 +112,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans);
     letter-spacing: -0.015em;
-    font-weight: 600;
+    font-weight: 700;
   }
 }
 

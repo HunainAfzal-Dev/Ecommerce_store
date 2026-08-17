@@ -135,7 +135,7 @@ export default function AdminProducts() {
         resetForm();
         setShowModal(true);
       }}
-      className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs uppercase tracking-wider font-bold px-4 py-2.5 rounded-lg shadow-sm transition"
+      className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-4 py-2.5 rounded-lg shadow-sm transition"
     >
       + New Garment
     </button>
@@ -216,28 +216,40 @@ export default function AdminProducts() {
                         <span className="font-bold text-stone-950 truncate max-w-xs">{product.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-stone-600 font-medium">
-                      {product.categories?.name || '—'}
+                    <td className="px-6 py-4">
+                      <span className="inline-block px-2 py-0.5 text-[11px] font-semibold text-[var(--color-special)] bg-[var(--color-special-bg)] border border-[var(--color-special-border)] rounded-md">
+                        {product.categories?.name || 'Unassigned'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 font-bold text-stone-950">
                       Rs. {product.price.toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
                       {product.stock_quantity <= 0 ? (
-                        <span className="text-red-700 font-bold">0 (Out of stock)</span>
+                        <span className="inline-flex items-center gap-1 text-[var(--color-danger)] font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-danger)]"></span>
+                          0 (Sold Out)
+                        </span>
                       ) : product.stock_quantity <= 3 ? (
-                        <span className="text-[var(--color-warning)] font-bold">{product.stock_quantity} (Low)</span>
+                        <span className="inline-flex items-center gap-1 text-[var(--color-warning)] font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-warning)]"></span>
+                          {product.stock_quantity} (Low)
+                        </span>
                       ) : (
-                        <span className="text-stone-700 font-medium">{product.stock_quantity}</span>
+                        <span className="inline-flex items-center gap-1 text-[var(--color-success)] font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]"></span>
+                          {product.stock_quantity}
+                        </span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       {product.is_active ? (
-                        <span className="inline-block px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold text-[var(--color-success)] bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-md">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold text-[var(--color-success)] bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]"></span>
                           Active
                         </span>
                       ) : (
-                        <span className="inline-block px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold text-stone-600 bg-stone-100 border border-stone-200 rounded-md">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold text-stone-600 bg-stone-100 border border-stone-200 rounded-md">
                           Draft
                         </span>
                       )}
@@ -245,13 +257,13 @@ export default function AdminProducts() {
                     <td className="px-6 py-4 text-right space-x-3">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-bold uppercase tracking-wider text-[11px]"
+                        className="text-[var(--color-info)] hover:text-[var(--color-info-hover)] font-bold uppercase tracking-wider text-[11px]"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(product.id, product.name)}
-                        className="text-red-600 hover:text-red-800 font-bold uppercase tracking-wider text-[11px]"
+                        className="text-[var(--color-danger)] hover:text-[var(--color-danger-hover)] font-bold uppercase tracking-wider text-[11px]"
                       >
                         Delete
                       </button>
@@ -281,7 +293,7 @@ export default function AdminProducts() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-xs font-medium">
+              <div className="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] text-[var(--color-danger)] px-4 py-3 rounded-lg text-xs font-medium">
                 {error}
               </div>
             )}
@@ -413,7 +425,7 @@ export default function AdminProducts() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:opacity-50 text-white uppercase tracking-wider font-bold px-5 py-2.5 rounded-lg shadow-sm transition flex items-center gap-2"
+                  className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 text-white uppercase tracking-wider font-bold px-5 py-2.5 rounded-lg shadow-sm transition flex items-center gap-2"
                 >
                   {saving ? 'Saving...' : editingId ? 'Update Garment' : 'Create Garment'}
                 </button>

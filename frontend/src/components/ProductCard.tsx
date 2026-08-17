@@ -34,11 +34,13 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Status Badges */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
           {isOutOfStock ? (
-            <span className="bg-stone-900/90 text-white text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-md backdrop-blur-xs">
+            <span className="inline-flex items-center gap-1 bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger-border)] text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md backdrop-blur-xs shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-danger)]"></span>
               Sold Out
             </span>
           ) : product.stock_quantity <= 3 ? (
-            <span className="bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[var(--color-accent-border)] text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-md">
+            <span className="inline-flex items-center gap-1 bg-[var(--color-warning-bg)] text-[var(--color-warning)] border border-[var(--color-warning-border)] text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-warning)]"></span>
               Low Stock ({product.stock_quantity})
             </span>
           ) : null}
@@ -47,17 +49,17 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Product Information */}
       <div className="p-4 space-y-1.5 bg-white">
-        <p className="text-[11px] font-semibold tracking-wider uppercase text-[var(--color-accent)] truncate">
+        <p className="text-[11px] font-bold tracking-wider uppercase text-[var(--color-accent)] truncate">
           {product.categories?.name || 'Garments Collection'}
         </p>
-        <h3 className="text-sm font-medium text-stone-900 group-hover:text-[var(--color-accent)] transition-colors line-clamp-1">
+        <h3 className="text-sm font-semibold text-stone-900 group-hover:text-[var(--color-accent)] transition-colors line-clamp-1">
           {product.name}
         </h3>
         <div className="pt-1 flex items-baseline justify-between">
-          <p className="text-sm font-bold text-stone-950 tracking-tight">
+          <p className="text-sm font-extrabold text-stone-950 tracking-tight">
             Rs. {product.price.toLocaleString()}
           </p>
-          <span className="text-xs font-semibold text-stone-400 group-hover:text-[var(--color-accent)] group-hover:translate-x-0.5 transition-all">
+          <span className="text-xs font-bold text-stone-400 group-hover:text-[var(--color-accent)] group-hover:translate-x-0.5 transition-all">
             View &rarr;
           </span>
         </div>
