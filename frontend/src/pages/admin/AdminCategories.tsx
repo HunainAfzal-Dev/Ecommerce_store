@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import AdminLayout from '../../components/AdminLayout';
+import Loader from '../../components/Loader';
 import { categoryApi } from '../../api/client';
+import { useToast } from '../../context/ToastContext';
 import type { Category } from '../../types';
 
 export default function AdminCategories() {
@@ -10,6 +13,7 @@ export default function AdminCategories() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const { showToast } = useToast();
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -18,6 +22,7 @@ export default function AdminCategories() {
       setCategories(res.data.data.categories || []);
     } catch (err) {
       console.error('Failed to load categories', err);
+      showToast('Failed to load categories.', 'error');
     } finally {
       setLoading(false);
     }
@@ -48,141 +53,154 @@ export default function AdminCategories() {
     try {
       if (editingId) {
         await categoryApi.update(editingId, { name, description: description || undefined });
+        showToast(`Category "${name}" updated.`, 'success');
       } else {
         await categoryApi.create({ name, description: description || undefined });
+        showToast(`Category "${name}" created.`, 'success');
       }
       resetForm();
       await fetchCategories();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save category');
+      const msg = err.response?.data?.message || 'Failed to save category';
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this category? Products in it will be affected.')) return;
+  const handleDelete = async (id: string, catName: string) => {
+    if (!confirm(`Delete category "${catName}"? Products in it will be affected.`)) return;
     try {
       await categoryApi.remove(id);
+      showToast(`Category "${catName}" deleted.`, 'info');
       await fetchCategories();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete category');
+      showToast(err.response?.data?.message || 'Failed to delete category', 'error');
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Categories</h1>
+    <AdminLayout
+      title="Departments & Categories"
+      subtitle="Define garment classifications and collection departments."
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left: Category Form */}
+        <div className="lg:col-span-5">
+          <form onSubmit={handleSubmit} className="bg-white border border-stone-200 p-6 sm:p-8 space-y-5 sticky top-28">
+            <h2 className="font-serif text-xl text-stone-950 font-normal pb-4 border-b border-stone-200">
+              {editingId ? 'Edit Department' : 'Create Department'}
+            </h2>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
-          {editingId ? 'Edit Category' : 'Add New Category'}
-        </h2>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-xs">
+                {error}
+              </div>
+            )}
 
-        {error && (
-          <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-            {error}
-          </div>
-        )}
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  Department Name *
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  placeholder="e.g. Kurtas & Tunics, Outerwear, Trousers"
+                />
+              </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category Name *
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g., T-Shirts"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Optional description"
-            />
-          </div>
+              <div>
+                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  placeholder="Brief narrative for this collection department..."
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-stone-200 flex gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-stone-950 hover:bg-stone-800 disabled:opacity-50 text-white text-xs uppercase tracking-widest font-semibold px-6 py-3 transition"
+              >
+                {saving ? 'Saving...' : editingId ? 'Update' : 'Add Department'}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="border border-stone-300 text-stone-700 text-xs uppercase tracking-wider font-semibold px-4 py-3 hover:bg-stone-50 transition"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
         </div>
 
-        <div className="flex gap-3 mt-4">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition"
-          >
-            {saving ? 'Saving...' : editingId ? 'Update' : 'Add Category'}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
+        {/* Right: Categories Table */}
+        <div className="lg:col-span-7">
+          {loading ? (
+            <Loader message="Loading categories..." />
+          ) : categories.length === 0 ? (
+            <div className="bg-white border border-stone-200 p-12 text-center space-y-2">
+              <p className="font-serif text-xl text-stone-400">No Departments Found</p>
+              <p className="text-xs text-stone-500 font-light">
+                Use the form on the left to add your first garment category.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white border border-stone-200 overflow-x-auto">
+              <table className="min-w-full divide-y divide-stone-200 text-xs text-left">
+                <thead className="bg-[#faf9f6] text-stone-500 uppercase tracking-widest text-[10px] font-semibold">
+                  <tr>
+                    <th className="px-6 py-4">Department</th>
+                    <th className="px-6 py-4">Description</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-200 font-light text-stone-800">
+                  {categories.map((category) => (
+                    <tr key={category.id} className="hover:bg-stone-50/70 transition">
+                      <td className="px-6 py-4 font-medium text-stone-950">
+                        {category.name}
+                      </td>
+                      <td className="px-6 py-4 text-stone-500 max-w-xs truncate">
+                        {category.description || '—'}
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
+                        <button
+                          onClick={() => handleEdit(category)}
+                          className="text-stone-900 hover:text-stone-600 font-semibold uppercase tracking-wider text-[11px]"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(category.id, category.name)}
+                          className="text-red-600 hover:text-red-800 font-semibold uppercase tracking-wider text-[11px]"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-      </form>
-
-      {/* Categories List */}
-      {loading ? (
-        <p className="text-gray-500 text-center py-8">Loading categories...</p>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {categories.map((category) => (
-                <tr key={category.id}>
-                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                    {category.name}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {category.description || '—'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(category)}
-                      className="text-indigo-600 hover:text-indigo-800 mr-4"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
-

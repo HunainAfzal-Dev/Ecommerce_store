@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import AdminLayout from '../../components/AdminLayout';
+import Loader from '../../components/Loader';
 import { productApi, categoryApi } from '../../api/client';
+import { useToast } from '../../context/ToastContext';
 import type { Product, Category } from '../../types';
 
 const emptyForm = {
@@ -16,11 +19,13 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [searchFilter, setSearchFilter] = useState('');
+  const { showToast } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -33,6 +38,7 @@ export default function AdminProducts() {
       setCategories(categoriesRes.data.data.categories || []);
     } catch (err) {
       console.error('Failed to load data', err);
+      showToast('Failed to load catalog data', 'error');
     } finally {
       setLoading(false);
     }
@@ -55,7 +61,7 @@ export default function AdminProducts() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
-    setShowForm(false);
+    setShowModal(false);
     setError('');
   };
 
@@ -70,7 +76,7 @@ export default function AdminProducts() {
       stock_quantity: String(product.stock_quantity),
       is_active: product.is_active
     });
-    setShowForm(true);
+    setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,268 +97,331 @@ export default function AdminProducts() {
     try {
       if (editingId) {
         await productApi.update(editingId, payload);
+        showToast(`Product "${form.name}" updated successfully.`, 'success');
       } else {
         await productApi.create(payload);
+        showToast(`Product "${form.name}" created successfully.`, 'success');
       }
       resetForm();
       await fetchData();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save product');
+      const msg = err.response?.data?.message || 'Failed to save product';
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to permanently delete "${name}"?`)) return;
     try {
       await productApi.remove(id);
+      showToast(`Product "${name}" deleted.`, 'info');
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete product');
+      showToast(err.response?.data?.message || 'Failed to delete product', 'error');
     }
   };
 
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+    (p.categories?.name && p.categories.name.toLowerCase().includes(searchFilter.toLowerCase()))
+  );
+
+  const actionButton = (
+    <button
+      onClick={() => {
+        resetForm();
+        setShowModal(true);
+      }}
+      className="bg-stone-950 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold px-5 py-3 transition"
+    >
+      + New Garment
+    </button>
+  );
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-500 text-sm">Manage your product catalog</p>
+    <AdminLayout
+      title="Product Catalog"
+      subtitle="Manage garments, update inventory levels, and control catalog visibility."
+      action={actionButton}
+    >
+      <div className="space-y-6">
+        {/* Search / Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-stone-200 p-4">
+          <div className="relative w-full sm:w-80">
+            <input
+              type="text"
+              placeholder="Search products by title or department..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 rounded-none"
+            />
+            <svg
+              className="w-4 h-4 text-stone-400 absolute left-3 top-2.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <span className="text-xs text-stone-500 font-light">
+            Showing {filteredProducts.length} of {products.length} garments
+          </span>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
-        >
-          {showForm ? 'Close' : '+ Add Product'}
-        </button>
+
+        {/* Products Table */}
+        {loading ? (
+          <Loader message="Loading garments catalog..." />
+        ) : filteredProducts.length === 0 ? (
+          <div className="bg-white border border-stone-200 p-16 text-center space-y-3">
+            <p className="font-serif text-2xl text-stone-400">No Garments Found</p>
+            <p className="text-xs text-stone-500 font-light">
+              {searchFilter ? 'Try clearing your search query.' : 'Click "+ New Garment" to add your first product.'}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white border border-stone-200 overflow-x-auto">
+            <table className="min-w-full divide-y divide-stone-200 text-xs text-left">
+              <thead className="bg-[#faf9f6] text-stone-500 uppercase tracking-widest text-[10px] font-semibold">
+                <tr>
+                  <th className="px-6 py-4">Garment</th>
+                  <th className="px-6 py-4">Department</th>
+                  <th className="px-6 py-4">Price</th>
+                  <th className="px-6 py-4">Stock</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-200 font-light text-stone-800">
+                {filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-stone-50/70 transition">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-13 bg-[#f5f4f0] border border-stone-200 shrink-0 overflow-hidden">
+                          {product.image_url ? (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
+                              👕
+                            </div>
+                          )}
+                        </div>
+                        <span className="font-medium text-stone-950 truncate max-w-xs">{product.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-stone-600">
+                      {product.categories?.name || '—'}
+                    </td>
+                    <td className="px-6 py-4 font-medium text-stone-950">
+                      Rs. {product.price.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.stock_quantity <= 0 ? (
+                        <span className="text-red-700 font-medium">0 (Out of stock)</span>
+                      ) : product.stock_quantity <= 3 ? (
+                        <span className="text-amber-700 font-medium">{product.stock_quantity} (Low)</span>
+                      ) : (
+                        <span className="text-stone-700">{product.stock_quantity}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.is_active ? (
+                        <span className="inline-block px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-block px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold text-stone-600 bg-stone-100 border border-stone-200">
+                          Draft
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right space-x-3">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-stone-900 hover:text-stone-600 font-semibold uppercase tracking-wider text-[11px]"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id, product.name)}
+                        className="text-red-600 hover:text-red-800 font-semibold uppercase tracking-wider text-[11px]"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Product Form */}
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
-            {editingId ? 'Edit Product' : 'Add New Product'}
-          </h2>
-
-          {error && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category *
-              </label>
-              <select
-                name="category_id"
-                value={form.category_id}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      {/* Add / Edit Product Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white border border-stone-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 animate-fade-in">
+            <div className="flex items-center justify-between pb-4 border-b border-stone-200">
+              <h2 className="font-serif text-2xl text-stone-950 font-normal">
+                {editingId ? 'Edit Garment' : 'New Garment'}
+              </h2>
+              <button
+                onClick={resetForm}
+                className="text-stone-400 hover:text-stone-900 p-1 text-lg"
               >
-                <option value="">Select category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+                ✕
+              </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (Rs.) *
-              </label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-xs">
+                {error}
+              </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock Quantity *
-              </label>
-              <input
-                type="number"
-                name="stock_quantity"
-                value={form.stock_quantity}
-                onChange={handleChange}
-                required
-                min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  Garment Title *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  placeholder="e.g. Linen Relaxed Kurta"
+                />
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL
-              </label>
-              <input
-                type="text"
-                name="image_url"
-                value={form.image_url}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                    Department / Category *
+                  </label>
+                  <select
+                    name="category_id"
+                    value={form.category_id}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  >
+                    <option value="">Select Department</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+                <div>
+                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                    Price in PKR (Rs.) *
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={form.price}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                    placeholder="e.g. 4500"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                name="is_active"
-                value={String(form.is_active)}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                    Stock Quantity *
+                  </label>
+                  <input
+                    type="number"
+                    name="stock_quantity"
+                    value={form.stock_quantity}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                    placeholder="e.g. 25"
+                  />
+                </div>
+
+                <div>
+                  <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                    Visibility Status
+                  </label>
+                  <select
+                    name="is_active"
+                    value={String(form.is_active)}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                  >
+                    <option value="true">Active (Publicly Visible)</option>
+                    <option value="false">Draft (Hidden)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  Garment Photography URL
+                </label>
+                <input
+                  type="text"
+                  name="image_url"
+                  value={form.image_url}
+                  onChange={handleChange}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                />
+              </div>
+
+              <div>
+                <label className="block uppercase tracking-wider font-semibold text-stone-700 mb-1.5">
+                  Garment Narrative / Description
+                </label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Details regarding cut, weave, and silhouette..."
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-stone-900 focus:outline-none focus:border-stone-950 rounded-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-stone-200 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="border border-stone-300 text-stone-700 uppercase tracking-wider font-semibold px-5 py-3 hover:bg-stone-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-stone-950 hover:bg-stone-800 disabled:opacity-50 text-white uppercase tracking-widest font-semibold px-6 py-3 transition flex items-center gap-2"
+                >
+                  {saving ? 'Saving...' : editingId ? 'Update Garment' : 'Create Garment'}
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div className="flex gap-3 mt-6">
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition"
-            >
-              {saving ? 'Saving...' : editingId ? 'Update Product' : 'Add Product'}
-            </button>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Products Table */}
-      {loading ? (
-        <p className="text-gray-500 text-center py-8">Loading products...</p>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden mr-3 flex items-center justify-center text-xl">
-                        {product.image_url ? (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          '👕'
-                        )}
-                      </div>
-                      <span className="font-medium text-gray-900">{product.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.categories?.name || '—'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    Rs. {product.price.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.stock_quantity}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {product.is_active ? (
-                      <span className="text-green-600 text-sm font-medium">Active</span>
-                    ) : (
-                      <span className="text-red-600 text-sm font-medium">Inactive</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="text-indigo-600 hover:text-indigo-800 mr-4"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }
-
