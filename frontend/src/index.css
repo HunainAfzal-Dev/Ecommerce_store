@@ -2,20 +2,68 @@
 
 @layer base {
   :root {
+    /* ============================================================
+       CENTRALIZED BRAND THEME SYSTEM
+       Modify any token here to update the entire application.
+       ============================================================ */
+    --color-primary: #1c1917;         /* Deep rich charcoal for main actions */
+    --color-primary-hover: #292524;   /* Primary hover state */
+    --color-primary-light: #f5f4f0;   /* Light primary tint */
+
+    --color-accent: #9c5b3c;          /* Warm Terracotta / Cognac luxury accent */
+    --color-accent-hover: #834b30;    /* Accent hover state */
+    --color-accent-light: #fcf6f3;    /* Soft accent background tint */
+    --color-accent-border: #eddcd3;   /* Accent border tint */
+
+    --color-background: #faf8f5;      /* Warm off-white / alabaster canvas */
+    --color-surface: #ffffff;         /* Pure white surface / card background */
+    --color-surface-hover: #f7f5f1;   /* Surface hover tint */
+    --color-surface-subtle: #f4f1ea;  /* Subtle section background */
+
+    --color-text: #1c1917;            /* High contrast primary text */
+    --color-text-secondary: #57534e;  /* Readable medium supporting text */
+    --color-text-muted: #78716c;      /* Subtle muted text */
+
+    --color-border: #e7e5e4;          /* Soft border */
+    --color-border-hover: #d6d3d1;    /* Border on hover */
+    --color-border-dark: #a8a29e;     /* Medium dark border */
+
+    --color-success: #15803d;         /* Forest emerald */
+    --color-success-bg: #f0fdf4;
+    --color-success-border: #bbf7d0;
+
+    --color-warning: #b45309;         /* Warm amber */
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fde68a;
+
+    --color-error: #b91c1c;           /* Crimson */
+    --color-error-bg: #fef2f2;
+    --color-error-border: #fecaca;
+
+    /* Border Radius Tokens */
+    --radius-sm: 0.375rem;            /* 6px */
+    --radius-md: 0.5rem;              /* 8px */
+    --radius-lg: 0.75rem;             /* 12px */
+    --radius-xl: 1rem;                /* 16px */
+
+    /* Typography Tokens */
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #faf9f6;
-    color: #1c1917;
+    background-color: var(--color-background);
+    color: var(--color-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
   }
 
-  h1, h2, h3, .font-serif-heading {
-    letter-spacing: -0.02em;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    letter-spacing: -0.015em;
+    font-weight: 600;
   }
 }
 
@@ -26,23 +74,23 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f5f4;
+  background: var(--color-background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
+  background: var(--color-border-hover);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a29e;
+  background: var(--color-border-dark);
 }
 
 /* Subtle micro animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -60,9 +108,9 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-slide-right {
-  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
