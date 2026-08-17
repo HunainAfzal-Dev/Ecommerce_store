@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <AdminLayout title="Overview" subtitle="Loading atelier analytics...">
+      <AdminLayout title="Overview" subtitle="Loading analytics...">
         <Loader message="Compiling store metrics..." />
       </AdminLayout>
     );
@@ -91,43 +91,43 @@ export default function AdminDashboard() {
       title="Atelier Overview"
       subtitle="Comprehensive performance metrics and management shortcuts."
     >
-      <div className="space-y-10">
+      <div className="space-y-8">
         {/* Total Revenue Highlight */}
-        <div className="bg-stone-950 text-white p-8 sm:p-10 border border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="bg-[var(--color-primary)] text-white p-8 sm:p-10 rounded-2xl border border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
           <div className="space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-semibold">
+            <span className="text-xs uppercase tracking-widest text-[var(--color-accent-border)] font-bold">
               Gross Store Revenue
-            </p>
-            <p className="font-serif text-3xl sm:text-4xl font-normal text-white">
+            </span>
+            <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Rs. {stats.totalRevenue.toLocaleString()}
             </p>
-            <p className="text-xs text-stone-400 font-light pt-1">
+            <p className="text-xs text-stone-400 font-normal pt-1">
               Calculated across all processed customer orders.
             </p>
           </div>
           <Link
             to="/admin/orders"
-            className="bg-white hover:bg-stone-100 text-stone-950 text-xs uppercase tracking-widest font-semibold px-6 py-3.5 text-center shrink-0 transition"
+            className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3.5 rounded-lg text-center shrink-0 shadow-sm transition"
           >
             Inspect Orders &rarr;
           </Link>
         </div>
 
         {/* 4 Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {statCards.map((card) => (
             <div
               key={card.title}
-              className="bg-white border border-stone-200 p-6 flex flex-col justify-between space-y-4 hover:border-stone-400 transition"
+              className="bg-white border border-stone-200/90 rounded-xl p-6 flex flex-col justify-between space-y-4 hover:border-stone-400 shadow-xs transition"
             >
               <div className="space-y-1">
-                <p className="text-[10px] uppercase tracking-wider font-semibold text-stone-400">
+                <span className="text-[11px] uppercase tracking-wider font-bold text-stone-400">
                   {card.title}
-                </p>
-                <p className="font-serif text-3xl text-stone-950 font-normal">
+                </span>
+                <p className="text-3xl font-extrabold text-stone-950 tracking-tight">
                   {card.value}
                 </p>
-                <p className="text-xs text-stone-500 font-light">
+                <p className="text-xs text-stone-500 font-normal">
                   {card.description}
                 </p>
               </div>
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
               <div className="pt-3 border-t border-stone-100">
                 <Link
                   to={card.link}
-                  className="text-xs uppercase tracking-wider font-semibold text-stone-900 hover:text-stone-600 transition flex items-center justify-between"
+                  className="text-xs uppercase tracking-wider font-bold text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition flex items-center justify-between"
                 >
                   <span>{card.linkText}</span>
                   <span>&rarr;</span>
@@ -146,43 +146,43 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Management Shortcuts */}
-        <div className="bg-white border border-stone-200 p-8 space-y-6">
-          <h2 className="font-serif text-xl text-stone-950 font-normal pb-4 border-b border-stone-200">
+        <div className="bg-white border border-stone-200/90 rounded-xl p-6 sm:p-8 space-y-6 shadow-xs">
+          <h2 className="text-lg font-bold text-stone-950 pb-3 border-b border-stone-100">
             Management Hub
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <Link
               to="/admin/products"
-              className="p-5 bg-[#faf9f6] border border-stone-200 hover:border-stone-950 transition block space-y-2 group"
+              className="p-5 bg-[var(--color-surface-subtle)] border border-stone-200/80 rounded-xl hover:border-[var(--color-primary)] transition block space-y-2 group"
             >
-              <p className="font-semibold text-sm text-stone-900 group-hover:text-stone-600">
+              <p className="font-bold text-sm text-stone-900 group-hover:text-[var(--color-accent)] transition-colors">
                 Product Catalog
               </p>
-              <p className="text-xs text-stone-500 font-light">
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">
                 Add new garments, update prices, manage stock quantities, or toggle visibility.
               </p>
             </Link>
 
             <Link
               to="/admin/categories"
-              className="p-5 bg-[#faf9f6] border border-stone-200 hover:border-stone-950 transition block space-y-2 group"
+              className="p-5 bg-[var(--color-surface-subtle)] border border-stone-200/80 rounded-xl hover:border-[var(--color-primary)] transition block space-y-2 group"
             >
-              <p className="font-semibold text-sm text-stone-900 group-hover:text-stone-600">
+              <p className="font-bold text-sm text-stone-900 group-hover:text-[var(--color-accent)] transition-colors">
                 Departments & Tags
               </p>
-              <p className="text-xs text-stone-500 font-light">
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">
                 Organize your catalog by creating new garment departments and seasonal tags.
               </p>
             </Link>
 
             <Link
               to="/admin/orders"
-              className="p-5 bg-[#faf9f6] border border-stone-200 hover:border-stone-950 transition block space-y-2 group"
+              className="p-5 bg-[var(--color-surface-subtle)] border border-stone-200/80 rounded-xl hover:border-[var(--color-primary)] transition block space-y-2 group"
             >
-              <p className="font-semibold text-sm text-stone-900 group-hover:text-stone-600">
+              <p className="font-bold text-sm text-stone-900 group-hover:text-[var(--color-accent)] transition-colors">
                 Fulfillment Pipeline
               </p>
-              <p className="text-xs text-stone-500 font-light">
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">
                 Track pending customer orders, update dispatch status, and review delivery details.
               </p>
             </Link>

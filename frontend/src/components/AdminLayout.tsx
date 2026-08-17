@@ -77,7 +77,7 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f4ef] text-stone-900 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[var(--color-background)] text-stone-900 flex flex-col md:flex-row">
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-stone-950 text-white px-4 py-3 flex items-center justify-between border-b border-stone-800">
         <div className="flex items-center space-x-3">
@@ -90,11 +90,11 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <span className="font-serif text-sm tracking-widest uppercase font-semibold">
+          <span className="text-sm tracking-wider uppercase font-bold text-white">
             Admin Portal
           </span>
         </div>
-        <Link to="/" className="text-xs uppercase tracking-wider text-stone-400 hover:text-white">
+        <Link to="/" className="text-xs uppercase tracking-wider text-[var(--color-accent-border)] hover:text-white font-semibold">
           Store &rarr;
         </Link>
       </div>
@@ -109,10 +109,10 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
           {/* Logo / Header */}
           <div className="flex items-center justify-between pb-6 border-b border-stone-800">
             <Link to="/" className="flex flex-col">
-              <span className="font-serif text-base tracking-[0.2em] font-semibold uppercase text-white">
+              <span className="text-base tracking-widest font-extrabold uppercase text-white">
                 Garments
               </span>
-              <span className="text-[9px] uppercase tracking-[0.25em] text-stone-500">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[var(--color-accent)] font-semibold">
                 Atelier Control
               </span>
             </Link>
@@ -133,13 +133,15 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
                   key={item.path}
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 text-xs uppercase tracking-wider font-semibold transition ${
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs uppercase tracking-wider font-bold transition ${
                     active
-                      ? 'bg-stone-900 text-white border-l-2 border-white'
+                      ? 'bg-stone-900 text-white border-l-3 border-[var(--color-accent)] shadow-xs'
                       : 'text-stone-400 hover:bg-stone-900 hover:text-white'
                   }`}
                 >
-                  <span className={active ? 'text-white' : 'text-stone-500'}>{item.icon}</span>
+                  <span className={active ? 'text-[var(--color-accent)]' : 'text-stone-500'}>
+                    {item.icon}
+                  </span>
                   <span>{item.label}</span>
                 </Link>
               );
@@ -151,8 +153,8 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
         <div className="p-6 border-t border-stone-800 space-y-3">
           <div className="flex items-center justify-between text-xs">
             <div className="min-w-0">
-              <p className="font-semibold text-white truncate">{user?.name}</p>
-              <p className="text-[10px] text-stone-500 uppercase tracking-wider">Administrator</p>
+              <p className="font-bold text-white truncate">{user?.name}</p>
+              <p className="text-[10px] text-[var(--color-accent)] uppercase tracking-wider font-semibold">Administrator</p>
             </div>
             <button
               onClick={handleLogout}
@@ -163,10 +165,10 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
             </button>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-1">
             <Link
               to="/"
-              className="block text-center py-2 bg-stone-900 hover:bg-stone-800 text-stone-300 hover:text-white text-[11px] uppercase tracking-wider font-semibold transition"
+              className="block text-center py-2.5 bg-stone-900 hover:bg-stone-800 text-stone-300 hover:text-white text-xs uppercase tracking-wider font-bold rounded-lg transition"
             >
               &larr; View Storefront
             </Link>
@@ -185,17 +187,17 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar header */}
-        <header className="bg-white border-b border-stone-200/80 px-6 sm:px-10 py-6">
+        <header className="bg-white border-b border-stone-200/90 px-6 sm:px-10 py-6 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-semibold">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
                 Admin Management
-              </p>
-              <h1 className="font-serif text-2xl sm:text-3xl text-stone-950 font-normal mt-0.5">
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight mt-0.5">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xs text-stone-500 font-light mt-0.5">{subtitle}</p>
+                <p className="text-xs text-stone-500 font-normal mt-0.5">{subtitle}</p>
               )}
             </div>
             {action && <div className="shrink-0">{action}</div>}

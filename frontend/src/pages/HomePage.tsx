@@ -34,43 +34,43 @@ export default function HomePage() {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail) return;
-    showToast('Thank you for subscribing to our seasonal gazette.', 'success');
+    showToast('Thank you for subscribing to our seasonal updates.', 'success');
     setNewsletterEmail('');
   };
 
   if (loading) return <Loader message="Curating collection..." />;
 
   return (
-    <div className="space-y-16 sm:space-y-24">
+    <div className="space-y-14 sm:space-y-20">
       {/* Editorial Hero Section */}
-      <section className="relative bg-[#f5f4ef] border-b border-stone-200 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32 lg:py-40">
+      <section className="relative bg-[var(--color-surface-subtle)] border-b border-stone-200/90 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
           <div className="max-w-2xl space-y-6">
-            <div className="inline-flex items-center space-x-2 bg-stone-900 text-white text-[10px] uppercase tracking-[0.25em] font-semibold px-3 py-1.5 rounded-none">
+            <div className="inline-flex items-center space-x-2 bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[var(--color-accent-border)] text-xs uppercase tracking-widest font-bold px-3 py-1.5 rounded-md">
               <span>New Season Edition</span>
             </div>
 
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-stone-950 font-normal tracking-tight leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl text-stone-950 font-extrabold tracking-tight leading-[1.15]">
               Refined Silhouettes, <br />
-              <span className="italic font-light">Timeless Comfort</span>
+              <span className="text-[var(--color-accent)] font-semibold">Timeless Comfort</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-stone-600 font-light leading-relaxed max-w-lg">
-              Explore our latest collection of contemporary garments crafted from pure breathable fabrics, tailored for effortless daily elegance.
+            <p className="text-sm sm:text-base text-stone-600 font-normal leading-relaxed max-w-lg">
+              Explore our curated garments crafted from pure breathable fabrics, tailored for effortless daily wear and modern understated luxury.
             </p>
 
-            <div className="pt-4 flex flex-wrap items-center gap-4">
+            <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
               <Link
                 to="/shop"
-                className="bg-stone-950 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold px-8 py-4 transition-all duration-200"
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-7 py-3.5 rounded-lg shadow-sm hover:shadow transition-all duration-200"
               >
                 Shop Collection
               </Link>
               <Link
                 to="/shop"
-                className="border border-stone-900 hover:bg-stone-900 hover:text-white text-stone-900 text-xs uppercase tracking-widest font-semibold px-8 py-4 transition-all duration-200"
+                className="bg-white hover:bg-stone-100 text-stone-900 border border-stone-300 text-xs uppercase tracking-wider font-bold px-7 py-3.5 rounded-lg shadow-2xs transition-all duration-200"
               >
-                View Lookbook
+                View Catalog &rarr;
               </Link>
             </div>
           </div>
@@ -80,35 +80,35 @@ export default function HomePage() {
       {/* Brand Value Pillars */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 border-y border-stone-200/80 py-8">
-          <div className="space-y-1.5">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-stone-900">
+          <div className="space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
               Pure Natural Fabrics
             </h3>
-            <p className="text-xs text-stone-500 font-light leading-relaxed">
-              100% fine cottons, linens, and breathable blends.
+            <p className="text-xs text-stone-500 font-normal leading-relaxed">
+              100% fine cottons, rich linens, and breathable blends.
             </p>
           </div>
-          <div className="space-y-1.5">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-stone-900">
+          <div className="space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
               Artisanal Tailoring
             </h3>
-            <p className="text-xs text-stone-500 font-light leading-relaxed">
-              Meticulous cuts designed for drape and longevity.
+            <p className="text-xs text-stone-500 font-normal leading-relaxed">
+              Meticulous cuts designed for drape, fit, and longevity.
             </p>
           </div>
-          <div className="space-y-1.5">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-stone-900">
+          <div className="space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
               Express Shipping
             </h3>
-            <p className="text-xs text-stone-500 font-light leading-relaxed">
-              Complimentary delivery on orders over Rs. 5,000.
+            <p className="text-xs text-stone-500 font-normal leading-relaxed">
+              Complimentary delivery nationwide on orders over Rs. 5,000.
             </p>
           </div>
-          <div className="space-y-1.5">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-stone-900">
-              Seamless Exchanges
+          <div className="space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
+              Doorstep Exchanges
             </h3>
-            <p className="text-xs text-stone-500 font-light leading-relaxed">
+            <p className="text-xs text-stone-500 font-normal leading-relaxed">
               Hassle-free 7-day doorstep size replacement.
             </p>
           </div>
@@ -118,18 +118,18 @@ export default function HomePage() {
       {/* Shop by Category Showcase */}
       {categories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-stone-200">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-3 border-b border-stone-200">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-500">
-                Curated Departments
+              <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
+                Departments
               </p>
-              <h2 className="font-serif text-2xl sm:text-3xl text-stone-900 font-normal mt-1">
+              <h2 className="text-2xl sm:text-3xl text-stone-950 font-bold tracking-tight mt-0.5">
                 Shop by Category
               </h2>
             </div>
             <Link
               to="/shop"
-              className="text-xs uppercase tracking-widest font-semibold text-stone-900 hover:text-stone-600 transition mt-2 sm:mt-0"
+              className="text-xs uppercase tracking-wider font-bold text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition mt-2 sm:mt-0"
             >
               Explore All Categories &rarr;
             </Link>
@@ -140,24 +140,24 @@ export default function HomePage() {
               <Link
                 key={category.id}
                 to={`/shop?category=${category.id}`}
-                className="group relative bg-white border border-stone-200 p-6 sm:p-8 flex flex-col justify-between min-h-[160px] hover:border-stone-950 transition-all duration-300"
+                className="group bg-white border border-stone-200/90 rounded-xl p-5 sm:p-6 flex flex-col justify-between min-h-[140px] hover:border-[var(--color-accent)] hover:shadow-xs transition-all duration-300"
               >
-                <div className="space-y-2">
-                  <span className="text-[10px] uppercase tracking-widest text-stone-400 font-medium">
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-stone-400 font-semibold">
                     Department
                   </span>
-                  <h3 className="font-serif text-lg sm:text-xl text-stone-900 group-hover:text-stone-600 transition">
+                  <h3 className="text-base sm:text-lg font-bold text-stone-950 group-hover:text-[var(--color-accent)] transition-colors">
                     {category.name}
                   </h3>
                   {category.description && (
-                    <p className="text-xs text-stone-500 line-clamp-2 font-light">
+                    <p className="text-xs text-stone-500 line-clamp-2 font-normal">
                       {category.description}
                     </p>
                   )}
                 </div>
 
-                <div className="pt-4 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-stone-900">
-                  <span>View Department</span>
+                <div className="pt-3 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
+                  <span>Browse</span>
                   <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
                 </div>
               </Link>
@@ -168,18 +168,18 @@ export default function HomePage() {
 
       {/* Featured / Latest Arrivals */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-stone-200">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-3 border-b border-stone-200">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-500">
-              The Latest Drop
+            <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
+              Latest Drop
             </p>
-            <h2 className="font-serif text-2xl sm:text-3xl text-stone-900 font-normal mt-1">
-              Latest Arrivals
+            <h2 className="text-2xl sm:text-3xl text-stone-950 font-bold tracking-tight mt-0.5">
+              Featured Arrivals
             </h2>
           </div>
           <Link
             to="/shop"
-            className="text-xs uppercase tracking-widest font-semibold text-stone-900 hover:text-stone-600 transition mt-2 sm:mt-0"
+            className="text-xs uppercase tracking-wider font-bold text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition mt-2 sm:mt-0"
           >
             View Complete Collection &rarr;
           </Link>
@@ -192,8 +192,8 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white border border-stone-200">
-            <p className="text-sm text-stone-500 font-light">
+          <div className="text-center py-16 bg-white border border-stone-200 rounded-xl">
+            <p className="text-xs text-stone-500 font-normal">
               No garments available in this collection yet. Check back soon.
             </p>
           </div>
@@ -202,24 +202,24 @@ export default function HomePage() {
 
       {/* Brand Ethos / Story Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-stone-900 text-white p-8 sm:p-16 lg:p-20 grid md:grid-cols-2 gap-8 items-center">
-          <div className="space-y-4">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-semibold">
-              The Philosophy
+        <div className="bg-[var(--color-primary)] text-white p-8 sm:p-14 lg:p-16 rounded-2xl grid md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-[var(--color-accent-border)] font-bold">
+              The Atelier Philosophy
             </p>
-            <h2 className="font-serif text-3xl sm:text-4xl font-normal leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
               Designed for ease. <br />
-              Tailored for perpetuity.
+              <span className="text-[var(--color-accent-border)] font-medium">Tailored for perpetuity.</span>
             </h2>
           </div>
-          <div className="space-y-4 text-xs sm:text-sm text-stone-300 font-light leading-relaxed">
+          <div className="space-y-4 text-xs sm:text-sm text-stone-300 font-normal leading-relaxed">
             <p>
               We believe in wardrobe essentials that transcend fleeting trends. Each garment is drafted with thoughtful proportion, durable seams, and rich textural fabrics that grow softer with every wear.
             </p>
             <div>
               <Link
                 to="/shop"
-                className="inline-block text-xs uppercase tracking-widest font-semibold text-white border-b border-white pb-1 hover:text-stone-300 hover:border-stone-300 transition"
+                className="inline-block text-xs uppercase tracking-wider font-bold text-white border-b-2 border-[var(--color-accent)] pb-1 hover:text-[var(--color-accent-border)] transition"
               >
                 Discover the Craft &rarr;
               </Link>
@@ -229,29 +229,29 @@ export default function HomePage() {
       </section>
 
       {/* Minimalist Newsletter */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-center space-y-4">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-stone-500 font-semibold">
-          The Atelier Gazette
+      <section className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-center space-y-3">
+        <p className="text-xs uppercase tracking-widest text-[var(--color-accent)] font-bold">
+          Stay Connected
         </p>
-        <h2 className="font-serif text-2xl sm:text-3xl text-stone-900 font-normal">
+        <h2 className="text-2xl sm:text-3xl text-stone-950 font-bold tracking-tight">
           Receive Early Access to Releases
         </h2>
-        <p className="text-xs sm:text-sm text-stone-500 font-light max-w-md mx-auto">
+        <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-md mx-auto">
           Subscribe for private drop notifications, seasonal styling notes, and private archive sales.
         </p>
 
-        <form onSubmit={handleNewsletterSubmit} className="pt-4 flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+        <form onSubmit={handleNewsletterSubmit} className="pt-3 flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto">
           <input
             type="email"
             value={newsletterEmail}
             onChange={(e) => setNewsletterEmail(e.target.value)}
             placeholder="Enter your email address"
             required
-            className="flex-1 px-4 py-3 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 rounded-none"
+            className="flex-1 px-4 py-3 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
           />
           <button
             type="submit"
-            className="bg-stone-950 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold px-6 py-3 transition"
+            className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3 rounded-lg transition shadow-xs"
           >
             Subscribe
           </button>

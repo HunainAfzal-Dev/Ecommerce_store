@@ -56,15 +56,15 @@ export default function ShopPage() {
   const activeCategoryName = categories.find((c) => c.id === activeCategory)?.name;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Page Header */}
-      <div className="mb-10 pb-6 border-b border-stone-200">
+      <div className="mb-8 pb-6 border-b border-stone-200">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-stone-500">
+            <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
               The Catalog
-            </p>
-            <h1 className="font-serif text-3xl sm:text-4xl text-stone-950 font-normal mt-1">
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight mt-1">
               {activeCategoryName || 'All Garments'}
             </h1>
           </div>
@@ -73,10 +73,10 @@ export default function ShopPage() {
           <div className="relative w-full md:w-80">
             <input
               type="text"
-              placeholder="Search by name or style..."
+              placeholder="Search garments by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 bg-white border border-stone-300 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 transition rounded-none"
+              className="w-full pl-9 pr-8 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
             />
             <svg
               className="w-4 h-4 text-stone-400 absolute left-3 top-3"
@@ -99,12 +99,12 @@ export default function ShopPage() {
         </div>
 
         {/* Category Filters Bar */}
-        <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             onClick={() => handleCategoryChange('')}
-            className={`shrink-0 px-4 py-2 text-xs uppercase tracking-wider font-medium transition-all ${
+            className={`shrink-0 px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition-all ${
               activeCategory === ''
-                ? 'bg-stone-950 text-white'
+                ? 'bg-[var(--color-primary)] text-white shadow-xs'
                 : 'bg-white border border-stone-200 text-stone-700 hover:border-stone-400'
             }`}
           >
@@ -115,9 +115,9 @@ export default function ShopPage() {
             <button
               key={category.id}
               onClick={() => handleCategoryChange(category.id)}
-              className={`shrink-0 px-4 py-2 text-xs uppercase tracking-wider font-medium transition-all ${
+              className={`shrink-0 px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition-all ${
                 activeCategory === category.id
-                  ? 'bg-stone-950 text-white'
+                  ? 'bg-[var(--color-primary)] text-white shadow-xs'
                   : 'bg-white border border-stone-200 text-stone-700 hover:border-stone-400'
               }`}
             >
@@ -138,9 +138,9 @@ export default function ShopPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-white border border-stone-200 p-8">
-            <p className="font-serif text-3xl text-stone-400 mb-3">No Pieces Found</p>
-            <p className="text-xs text-stone-500 font-light max-w-sm mx-auto mb-6">
+          <div className="text-center py-20 bg-white border border-stone-200 rounded-xl p-8 shadow-xs">
+            <p className="text-2xl font-bold text-stone-700 mb-2">No Pieces Found</p>
+            <p className="text-xs text-stone-500 font-normal max-w-sm mx-auto mb-6">
               We could not find any garments matching your current search criteria or category filter.
             </p>
             <button
@@ -148,7 +148,7 @@ export default function ShopPage() {
                 setSearch('');
                 handleCategoryChange('');
               }}
-              className="bg-stone-950 text-white text-xs uppercase tracking-widest font-semibold px-6 py-3 hover:bg-stone-800 transition"
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3 rounded-lg transition"
             >
               Reset Filters
             </button>
