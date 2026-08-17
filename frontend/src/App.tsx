@@ -26,7 +26,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 function App() {
   return (
     <ToastProvider>
-      <div className="min-h-screen flex flex-col bg-[#faf9f6] text-stone-900 selection:bg-stone-900 selection:text-white">
+      <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-stone-900 selection:bg-[var(--color-primary)] selection:text-white">
         <Navbar />
         
         <main className="flex-1">
@@ -110,17 +110,17 @@ function App() {
             <Route
               path="*"
               element={
-                <div className="max-w-2xl mx-auto px-4 py-28 text-center">
-                  <span className="font-serif text-6xl text-stone-300">404</span>
-                  <h1 className="text-2xl font-serif mt-3 mb-3 text-stone-900 tracking-wide">
+                <div className="max-w-2xl mx-auto px-4 py-24 text-center">
+                  <span className="text-6xl font-extrabold text-stone-300">404</span>
+                  <h1 className="text-2xl font-bold mt-2 mb-2 text-stone-900 tracking-tight">
                     Page Not Found
                   </h1>
-                  <p className="text-sm text-stone-500 mb-8 max-w-sm mx-auto">
+                  <p className="text-xs text-stone-500 mb-6 max-w-sm mx-auto font-normal">
                     The collection or garment you are looking for may have been moved or is currently unavailable.
                   </p>
                   <Link
                     to="/"
-                    className="inline-block bg-stone-900 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold px-8 py-3.5 transition"
+                    className="inline-block bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-8 py-3.5 rounded-lg transition"
                   >
                     Return to Atelier
                   </Link>
@@ -131,48 +131,48 @@ function App() {
         </main>
 
         {/* Minimal Luxury Footer */}
-        <footer className="bg-stone-950 text-stone-300 border-t border-stone-900 pt-16 pb-12 mt-20">
+        <footer className="bg-stone-950 text-stone-300 border-t border-stone-900 pt-14 pb-10 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-stone-800">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-stone-800">
               {/* Brand Philosophy */}
-              <div className="space-y-4 md:col-span-1">
+              <div className="space-y-3 md:col-span-1">
                 <Link to="/" className="inline-block">
-                  <span className="font-serif text-xl tracking-[0.2em] font-semibold uppercase text-white">
+                  <span className="text-lg tracking-widest font-extrabold uppercase text-white">
                     Garments Store
                   </span>
                 </Link>
-                <p className="text-xs text-stone-400 leading-relaxed">
-                  Refined modern silhouettes crafted with purposeful minimalism, sustainable natural fabrics, and uncompromising attention to detail.
+                <p className="text-xs text-stone-400 leading-relaxed font-normal">
+                  Refined contemporary silhouettes crafted with purposeful minimalism, sustainable natural fabrics, and uncompromising attention to detail.
                 </p>
               </div>
 
               {/* Navigation */}
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-3">
                   Collection
                 </h3>
-                <ul className="space-y-2.5 text-xs text-stone-400">
+                <ul className="space-y-2 text-xs text-stone-400 font-normal">
                   <li>
-                    <Link to="/shop" className="hover:text-white transition">All Garments</Link>
+                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">All Garments</Link>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-white transition">New Arrivals</Link>
+                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">New Arrivals</Link>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-white transition">Essential Outerwear</Link>
+                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">Essential Outerwear</Link>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-white transition">Seasonal Edit</Link>
+                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">Seasonal Edit</Link>
                   </li>
                 </ul>
               </div>
 
               {/* Customer Care */}
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-3">
                   Client Care
                 </h3>
-                <ul className="space-y-2.5 text-xs text-stone-400">
+                <ul className="space-y-2 text-xs text-stone-400 font-normal">
                   <li>
                     <span className="hover:text-white cursor-pointer transition">Complimentary Shipping</span>
                   </li>
@@ -189,23 +189,23 @@ function App() {
               </div>
 
               {/* Editorial / Values */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">
+              <div className="space-y-2.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-3">
                   Our Promise
                 </h3>
-                <p className="text-xs text-stone-400 leading-relaxed">
+                <p className="text-xs text-stone-400 leading-relaxed font-normal">
                   Every piece is tailored for longevity and versatile everyday elegance. Designed for conscious lifestyles.
                 </p>
-                <div className="pt-2 text-[11px] text-stone-500 uppercase tracking-widest">
+                <div className="pt-1 text-[11px] text-[var(--color-accent-border)] uppercase tracking-wider font-semibold">
                   Karachi &bull; Lahore &bull; Islamabad &bull; Worldwide
                 </div>
               </div>
             </div>
 
             {/* Bottom Bar */}
-            <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
+            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500 font-normal">
               <p>© {new Date().getFullYear()} Garments Store Atelier. All rights reserved.</p>
-              <div className="flex items-center space-x-6 text-[11px] uppercase tracking-wider">
+              <div className="flex items-center space-x-5 text-[11px] uppercase tracking-wider">
                 <span className="hover:text-stone-400 cursor-pointer">Privacy</span>
                 <span className="hover:text-stone-400 cursor-pointer">Terms</span>
                 <span className="hover:text-stone-400 cursor-pointer">Accessibility</span>
@@ -219,5 +219,3 @@ function App() {
 }
 
 export default App;
-
-
