@@ -1,12 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Loader from '../components/Loader';
 import { productApi } from '../api/client';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getCategoryTheme } from '../components/ProductCard';
+import { Sparkles, Check } from 'lucide-react';
 import type { Product } from '../types';
+
+const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+const colorOptions = [
+  { name: 'Obsidian Black', hex: '#1c1917', bgClass: 'bg-stone-900' },
+  { name: 'Warm Cognac', hex: '#9c5b3c', bgClass: 'bg-amber-800' },
+  { name: 'Indigo Dye', hex: '#1e3a8a', bgClass: 'bg-blue-900' },
+  { name: 'Slate Gray', hex: '#475569', bgClass: 'bg-slate-600' }
+];
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +29,8 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedColor, setSelectedColor] = useState(colorOptions[0].name);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'details' | 'care' | 'shipping'>('details');
 
@@ -48,7 +60,7 @@ export default function ProductDetailPage() {
     setAdding(true);
     try {
       await addToCart(product.id, quantity);
-      showToast(`${quantity} × ${product.name} added to your bag.`, 'success');
+      showToast(`${quantity} × ${product.name} (Size: ${selectedSize}) added to your bag.`, 'success');
     } catch (err: any) {
       showToast(err.response?.data?.message || 'Failed to add item to bag', 'error');
     } finally {
@@ -66,7 +78,7 @@ export default function ProductDetailPage() {
         <p className="text-xs text-stone-500 mb-6">{error || 'This piece is currently unavailable.'}</p>
         <button
           onClick={() => navigate('/shop')}
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3.5 rounded-lg transition"
+          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs uppercase tracking-wider font-bold px-6 py-3.5 rounded-xl transition"
         >
           Return to Shop
         </button>
@@ -79,7 +91,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 pb-24 sm:pb-12">
-      {/* Breadcrumb Navigation - scrollable on small screens without breaking */}
+      {/* Breadcrumb Navigation */}
       <nav className="flex items-center space-x-2 text-xs font-medium text-stone-400 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
         <Link to="/" className="hover:text-stone-900 transition shrink-0">Home</Link>
         <span>/</span>
@@ -101,9 +113,9 @@ export default function ProductDetailPage() {
 
       {/* Balanced 2-Column Product Layout with Responsive Sizing */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
-        {/* Left Column: Responsive Controlled Image Presentation */}
+        {/* Left Column: Image Presentation with Floating Craft Badge */}
         <div className="lg:col-span-5 w-full">
-          <div className="relative aspect-[4/5] max-h-[380px] sm:max-h-[480px] w-full bg-[#f7f5f1] border border-stone-200 rounded-2xl overflow-hidden shadow-xs mx-auto">
+          <div className="relative aspect-[4/5] max-h-[380px] sm:max-h-[480px] w-full bg-[#f7f5f1] border border-stone-200 rounded-3xl overflow-hidden shadow-xs mx-auto">
             {product.image_url ? (
               <img
                 src={product.image_url}
@@ -118,11 +130,21 @@ export default function ProductDetailPage() {
                 <span className="text-xs tracking-wider uppercase mt-2 font-medium">Garment Detail</span>
               </div>
             )}
+
+            {/* Floating Quality Sticker */}
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+              className="absolute top-4 left-4 px-3 py-1 rounded-xl bg-white/95 backdrop-blur-md border border-stone-200 shadow-md flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-widest text-stone-800"
+            >
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              <span>Atelier Verified</span>
+            </motion.div>
           </div>
         </div>
 
         {/* Right Column: Detailed Product Info & Actions Panel */}
-        <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-2xl p-5 sm:p-8 space-y-6 shadow-xs">
+        <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-8 space-y-6 shadow-xs">
           {/* Header & Price with Dashboard Category Accent */}
           <div className="space-y-2 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
@@ -169,7 +191,56 @@ export default function ProductDetailPage() {
             <p>{product.description || 'Crafted with premium breathable natural fibers for effortless comfort, versatile styling, and long-lasting durability.'}</p>
           </div>
 
-          {/* Quantity Selector & Add to Bag (min 44px touch targets) */}
+          {/* Size Variant Chips */}
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold uppercase tracking-wider text-stone-700">Select Size:</span>
+              <span className="text-[var(--color-accent)] font-extrabold">Size {selectedSize}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {availableSizes.map((sz) => (
+                <button
+                  key={sz}
+                  type="button"
+                  onClick={() => setSelectedSize(sz)}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    selectedSize === sz
+                      ? 'bg-[var(--color-primary)] text-white shadow-xs font-extrabold'
+                      : 'bg-stone-50 border border-stone-200 text-stone-700 hover:border-stone-400'
+                  }`}
+                >
+                  {sz}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Color Selector Dots */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold uppercase tracking-wider text-stone-700">Color Tone:</span>
+              <span className="text-stone-600 font-medium">{selectedColor}</span>
+            </div>
+            <div className="flex items-center space-x-2.5">
+              {colorOptions.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => setSelectedColor(c.name)}
+                  className={`w-7 h-7 rounded-full ${c.bgClass} transition-all flex items-center justify-center ${
+                    selectedColor === c.name
+                      ? 'ring-2 ring-[var(--color-primary)] ring-offset-2 scale-110'
+                      : 'hover:scale-105'
+                  }`}
+                  title={c.name}
+                >
+                  {selectedColor === c.name && <Check className="w-3.5 h-3.5 text-white" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quantity Selector & Add to Bag */}
           {!isOutOfStock && (
             <div className="space-y-4 pt-4 border-t border-stone-100">
               <div className="flex items-center justify-between sm:justify-start gap-4">
@@ -203,7 +274,7 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={adding}
-                className="w-full min-h-[50px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-4 px-4 rounded-xl shadow-sm transition-all duration-150 flex items-center justify-center gap-2"
+                className="w-full min-h-[52px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-extrabold py-4 px-4 rounded-2xl shadow-md transition-all duration-150 flex items-center justify-center gap-2"
               >
                 {adding ? (
                   <>
@@ -217,7 +288,7 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Information Tabs - touch-friendly */}
+          {/* Information Tabs */}
           <div className="pt-4 border-t border-stone-100">
             <div className="flex border-b border-stone-200 text-xs font-bold gap-4 sm:gap-6 overflow-x-auto scrollbar-none">
               <button
@@ -230,7 +301,7 @@ export default function ProductDetailPage() {
               >
                 Details & Fit
                 {activeTab === 'details' && (
-                  <span className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
+                  <motion.span layoutId="tab-underline" className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
                 )}
               </button>
               <button
@@ -243,7 +314,7 @@ export default function ProductDetailPage() {
               >
                 Fabric & Care
                 {activeTab === 'care' && (
-                  <span className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
+                  <motion.span layoutId="tab-underline" className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
                 )}
               </button>
               <button
@@ -256,7 +327,7 @@ export default function ProductDetailPage() {
               >
                 Delivery & Returns
                 {activeTab === 'shipping' && (
-                  <span className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
+                  <motion.span layoutId="tab-underline" className={`absolute bottom-0 left-0 w-full h-0.5 ${categoryTheme.dot} rounded-full`} />
                 )}
               </button>
             </div>
@@ -276,7 +347,7 @@ export default function ProductDetailPage() {
               )}
               {activeTab === 'shipping' && (
                 <p>
-                  Complimentary express shipping on orders over Rs. 5,000. Standard delivery delivers within 3–5 business days nationwide with doorstep replacement.
+                  Complimentary express shipping on orders over Rs. 5,000. Standard delivery delivers within 2–4 business days nationwide with 7-day doorstep replacement.
                 </p>
               )}
             </div>
@@ -284,9 +355,9 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Mobile Sticky Bottom Action Bar for instant 1-tap checkout/add to cart on phones */}
+      {/* Mobile Sticky Bottom Action Bar */}
       {!isOutOfStock && (
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 shadow-lg flex items-center justify-between gap-3 animate-fade-in">
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 shadow-xl flex items-center justify-between gap-3 animate-fade-in">
           <div className="min-w-0 flex flex-col">
             <span className="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Total</span>
             <span className="text-base font-extrabold text-stone-950 truncate">
@@ -298,12 +369,12 @@ export default function ProductDetailPage() {
             type="button"
             onClick={handleAddToCart}
             disabled={adding}
-            className="flex-1 min-h-[44px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.98] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2"
+            className="flex-1 min-h-[44px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.98] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-extrabold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2"
           >
             {adding ? (
               <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
             ) : (
-              <span>Add to Bag</span>
+              <span>Add to Bag ({selectedSize})</span>
             )}
           </button>
         </div>

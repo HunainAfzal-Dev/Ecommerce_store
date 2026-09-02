@@ -1,44 +1,53 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
+import React from 'react';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
-
-// Public pages
+import Navbar from './components/Navbar';
+import AIAssistantPill from './components/AIAssistantPill';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-
-// Protected pages
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
-
-// Admin pages
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
 
+// Protected Route for Authenticated Users
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+}
+
+// Protected Route for Admin Users
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isAdmin } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <ToastProvider>
-      <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-stone-900 selection:bg-[var(--color-primary)] selection:text-white">
+      <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-text)] selection:bg-[var(--color-accent)] selection:text-white font-sans relative">
         <Navbar />
-        
-        <main className="flex-1">
+
+        <main className="flex-grow">
           <Routes>
-            {/* Public */}
+            {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected (require login) */}
+            {/* Authenticated Customer Routes */}
             <Route
               path="/cart"
               element={
@@ -64,7 +73,7 @@ function App() {
               }
             />
 
-            {/* Admin (require admin role) */}
+            {/* Admin Management Routes */}
             <Route
               path="/admin"
               element={
@@ -106,7 +115,7 @@ function App() {
               }
             />
 
-            {/* 404 */}
+            {/* 404 Page */}
             <Route
               path="*"
               element={
@@ -129,6 +138,9 @@ function App() {
             />
           </Routes>
         </main>
+
+        {/* Interactive AI Floating Assistant Pill */}
+        <AIAssistantPill />
 
         {/* Minimal Luxury Footer */}
         <footer className="bg-stone-950 text-stone-300 border-t border-stone-900 pt-14 pb-10 mt-16">
@@ -153,16 +165,16 @@ function App() {
                 </h3>
                 <ul className="space-y-2 text-xs text-stone-400 font-normal">
                   <li>
-                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">All Garments</Link>
+                    <Link to="/shop" className="hover:text-stone-100 transition">All Garments</Link>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">New Arrivals</Link>
+                    <Link to="/shop" className="hover:text-stone-100 transition">New Arrivals</Link>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">Essential Outerwear</Link>
+                    <Link to="/shop" className="hover:text-stone-100 transition">Essential Outerwear</Link>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-[var(--color-accent-border)] transition">Seasonal Edit</Link>
+                    <Link to="/shop" className="hover:text-stone-100 transition">Seasonal Edit</Link>
                   </li>
                 </ul>
               </div>
@@ -196,7 +208,7 @@ function App() {
                 <p className="text-xs text-stone-400 leading-relaxed font-normal">
                   Every piece is tailored for longevity and versatile everyday elegance. Designed for conscious lifestyles.
                 </p>
-                <div className="pt-1 text-[11px] text-[var(--color-accent-border)] uppercase tracking-wider font-semibold">
+                <div className="pt-1 text-[11px] text-stone-400 uppercase tracking-wider font-semibold">
                   Karachi &bull; Lahore &bull; Islamabad &bull; Worldwide
                 </div>
               </div>
@@ -204,7 +216,7 @@ function App() {
 
             {/* Bottom Bar */}
             <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500 font-normal">
-              <p>© {new Date().getFullYear()} Garments Store Atelier. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} Garments Store. All rights reserved.</p>
               <div className="flex items-center space-x-5 text-[11px] uppercase tracking-wider">
                 <span className="hover:text-stone-400 cursor-pointer">Privacy</span>
                 <span className="hover:text-stone-400 cursor-pointer">Terms</span>

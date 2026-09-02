@@ -63,27 +63,22 @@
     --color-special-border: #ddd6fe;
 
     /* 4. Dashboard KPI / Analytics Visual Accents */
-    /* Products Metric: Sophisticated Indigo/Blue */
     --color-stat-products: #2563eb;
     --color-stat-products-bg: #eff6ff;
     --color-stat-products-border: #bfdbfe;
 
-    /* Categories Metric: Refined Violet/Purple */
     --color-stat-categories: #7c3aed;
     --color-stat-categories-bg: #f5f3ff;
     --color-stat-categories-border: #ddd6fe;
 
-    /* Orders Metric: Warm Amber/Orange */
     --color-stat-orders: #d97706;
     --color-stat-orders-bg: #fffbeb;
     --color-stat-orders-border: #fde68a;
 
-    /* Users Metric: Refined Teal */
     --color-stat-users: #0d9488;
     --color-stat-users-bg: #f0fdfa;
     --color-stat-users-border: #99f6e4;
 
-    /* Revenue Metric: Premium Emerald */
     --color-stat-revenue: #059669;
     --color-stat-revenue-bg: #ecfdf5;
     --color-stat-revenue-border: #a7f3d0;
@@ -146,6 +141,36 @@
   background: var(--color-border-dark);
 }
 
+/* Continuous Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Soft floating badge animation */
+@keyframes floatSoft {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float-soft {
+  animation: floatSoft 4s ease-in-out infinite;
+}
+
 /* Subtle micro animations */
 @keyframes fadeIn {
   from {
@@ -158,19 +183,6 @@
   }
 }
 
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
 .animate-fade-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slide-right {
-  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
