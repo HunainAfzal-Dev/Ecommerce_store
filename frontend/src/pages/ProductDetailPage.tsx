@@ -7,7 +7,8 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getCategoryTheme } from '../components/ProductCard';
-import { Sparkles, Check } from 'lucide-react';
+import { addToRecentlyViewed, toggleWishlist, isInWishlist, LiveViewerBadge } from '../components/FloatingWidgets';
+import { Sparkles, Check, Heart } from 'lucide-react';
 import type { Product } from '../types';
 
 const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
@@ -33,13 +34,26 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].name);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'details' | 'care' | 'shipping'>('details');
+  const [wishlisted, setWishlisted] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
       try {
         const res = await productApi.getById(id);
-        setProduct(res.data.data.product);
+        const p = res.data.data.product;
+        setProduct(p);
+
+        // Track recently viewed
+        addToRecentlyViewed({
+          id: String(p.id),
+          name: p.name,
+          image_url: p.image_url || '',
+          price: p.price,
+        });
+
+        // Check wishlist status
+        setWishlisted(isInWishlist(String(p.id)));
       } catch (err: any) {
         setError(err.response?.data?.message || 'Garment not found');
       } finally {
@@ -66,6 +80,21 @@ export default function ProductDetailPage() {
     } finally {
       setAdding(false);
     }
+  };
+
+  const handleWishlistToggle = () => {
+    if (!product) return;
+    const newState = toggleWishlist({
+      id: String(product.id),
+      name: product.name,
+      image_url: product.image_url || '',
+      price: product.price,
+    });
+    setWishlisted(newState);
+    showToast(
+      newState ? `${product.name} added to your wishlist.` : `${product.name} removed from wishlist.`,
+      newState ? 'success' : 'info'
+    );
   };
 
   if (loading) return <Loader message="Presenting garment..." />;
@@ -111,9 +140,9 @@ export default function ProductDetailPage() {
         <span className="text-stone-800 font-semibold truncate max-w-[160px] sm:max-w-none">{product.name}</span>
       </nav>
 
-      {/* Balanced 2-Column Product Layout with Responsive Sizing */}
+      {/* 2-Column Product Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
-        {/* Left Column: Image Presentation with Floating Craft Badge */}
+        {/* Left Column: Image */}
         <div className="lg:col-span-5 w-full">
           <div className="relative aspect-[4/5] max-h-[380px] sm:max-h-[480px] w-full bg-[#f7f5f1] border border-stone-200 rounded-3xl overflow-hidden shadow-xs mx-auto">
             {product.image_url ? (
@@ -140,24 +169,38 @@ export default function ProductDetailPage() {
               <Sparkles className="w-3 h-3 text-amber-500" />
               <span>Atelier Verified</span>
             </motion.div>
+
+            {/* Wishlist Heart on Image */}
+            <button
+              type="button"
+              onClick={handleWishlistToggle}
+              className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md z-10 ${
+                wishlisted
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-white/90 backdrop-blur-md text-stone-500 hover:text-rose-500'
+              }`}
+              title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart className={`w-4.5 h-4.5 ${wishlisted ? 'fill-current' : ''}`} />
+            </button>
           </div>
         </div>
 
-        {/* Right Column: Detailed Product Info & Actions Panel */}
+        {/* Right Column: Product Info */}
         <div className="lg:col-span-7 bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-8 space-y-6 shadow-xs">
-          {/* Header & Price with Dashboard Category Accent */}
+          {/* Header & Price */}
           <div className="space-y-2 pb-4 border-b border-stone-100">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${categoryTheme.text} ${categoryTheme.bg} px-3 py-1 rounded-md border ${categoryTheme.border}`}>
                 <span className={`w-2 h-2 rounded-full ${categoryTheme.dot}`}></span>
                 {product.categories?.name || 'Garments Collection'}
               </span>
             </div>
-            
+
             <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
               {product.name}
             </h1>
-            
+
             <div className="pt-2 flex flex-wrap items-baseline gap-2 sm:gap-3">
               <span className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
                 Rs. {product.price.toLocaleString()}
@@ -166,8 +209,8 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Semantic Stock Availability */}
-          <div>
+          {/* Live Viewer Count + Stock */}
+          <div className="flex flex-wrap items-center gap-3">
             {isOutOfStock ? (
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-danger)] bg-[var(--color-danger-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-danger-border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-danger)]"></span>
@@ -176,14 +219,17 @@ export default function ProductDetailPage() {
             ) : product.stock_quantity <= 3 ? (
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-warning)] bg-[var(--color-warning-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-warning-border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-warning)] animate-pulse"></span>
-                Low Stock — Only {product.stock_quantity} pieces remaining
+                Low Stock — Only {product.stock_quantity} left
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-success)] bg-[var(--color-success-bg)] px-3 py-1.5 rounded-lg border border-[var(--color-success-border)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--color-success)]"></span>
-                In Stock ({product.stock_quantity} available)
+                In Stock ({product.stock_quantity})
               </div>
             )}
+
+            {/* Live Viewer Badge */}
+            <LiveViewerBadge />
           </div>
 
           {/* Description */}
@@ -240,7 +286,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Quantity Selector & Add to Bag */}
+          {/* Quantity & Add to Bag */}
           {!isOutOfStock && (
             <div className="space-y-4 pt-4 border-t border-stone-100">
               <div className="flex items-center justify-between sm:justify-start gap-4">
@@ -270,21 +316,37 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={adding}
-                className="w-full min-h-[52px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-extrabold py-4 px-4 rounded-2xl shadow-md transition-all duration-150 flex items-center justify-center gap-2"
-              >
-                {adding ? (
-                  <>
-                    <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                    <span>Adding to Bag...</span>
-                  </>
-                ) : (
-                  <span>Add to Shopping Bag &bull; Rs. {(product.price * quantity).toLocaleString()}</span>
-                )}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={adding}
+                  className="flex-1 min-h-[52px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] disabled:opacity-50 text-white text-xs uppercase tracking-wider font-extrabold py-4 px-4 rounded-2xl shadow-md transition-all duration-150 flex items-center justify-center gap-2"
+                >
+                  {adding ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                      <span>Adding to Bag...</span>
+                    </>
+                  ) : (
+                    <span>Add to Bag &bull; Rs. {(product.price * quantity).toLocaleString()}</span>
+                  )}
+                </button>
+
+                {/* Wishlist Button alongside Add to Bag */}
+                <button
+                  type="button"
+                  onClick={handleWishlistToggle}
+                  className={`w-[52px] min-h-[52px] rounded-2xl border-2 flex items-center justify-center transition-all ${
+                    wishlisted
+                      ? 'bg-rose-50 border-rose-300 text-rose-500'
+                      : 'bg-white border-stone-200 text-stone-400 hover:text-rose-500 hover:border-rose-200'
+                  }`}
+                  title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+                >
+                  <Heart className={`w-5 h-5 ${wishlisted ? 'fill-current' : ''}`} />
+                </button>
+              </div>
             </div>
           )}
 
@@ -294,9 +356,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={() => setActiveTab('details')}
                 className={`py-3 transition-colors relative shrink-0 ${
-                  activeTab === 'details'
-                    ? 'text-stone-950 font-bold'
-                    : 'text-stone-400 hover:text-stone-700'
+                  activeTab === 'details' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
                 }`}
               >
                 Details & Fit
@@ -307,9 +367,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={() => setActiveTab('care')}
                 className={`py-3 transition-colors relative shrink-0 ${
-                  activeTab === 'care'
-                    ? 'text-stone-950 font-bold'
-                    : 'text-stone-400 hover:text-stone-700'
+                  activeTab === 'care' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
                 }`}
               >
                 Fabric & Care
@@ -320,9 +378,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={() => setActiveTab('shipping')}
                 className={`py-3 transition-colors relative shrink-0 ${
-                  activeTab === 'shipping'
-                    ? 'text-stone-950 font-bold'
-                    : 'text-stone-400 hover:text-stone-700'
+                  activeTab === 'shipping' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
                 }`}
               >
                 Delivery & Returns
@@ -347,7 +403,7 @@ export default function ProductDetailPage() {
               )}
               {activeTab === 'shipping' && (
                 <p>
-                  Complimentary express shipping on orders over Rs. 5,000. Standard delivery delivers within 2–4 business days nationwide with 7-day doorstep replacement.
+                  Complimentary express shipping on orders over Rs. 5,000. Standard delivery within 2–4 business days nationwide with 7-day doorstep replacement.
                 </p>
               )}
             </div>
@@ -364,6 +420,16 @@ export default function ProductDetailPage() {
               Rs. {(product.price * quantity).toLocaleString()}
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={handleWishlistToggle}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 ${
+              wishlisted ? 'bg-rose-50 border-rose-300 text-rose-500' : 'bg-white border-stone-200 text-stone-400'
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${wishlisted ? 'fill-current' : ''}`} />
+          </button>
 
           <button
             type="button"

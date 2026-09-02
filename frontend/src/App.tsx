@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
 import AIAssistantPill from './components/AIAssistantPill';
+import FloatingWidgets from './components/FloatingWidgets';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -138,6 +139,9 @@ function App() {
             />
           </Routes>
         </main>
+
+        {/* Global Floating Widgets */}
+        <FloatingWidgets />
 
         {/* Interactive AI Floating Assistant Pill */}
         <AIAssistantPill />
