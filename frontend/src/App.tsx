@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
-import AIAssistantPill from './components/AIAssistantPill';
 import FloatingWidgets from './components/FloatingWidgets';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
