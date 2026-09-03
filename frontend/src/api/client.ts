@@ -3,7 +3,8 @@ import type { Product } from '../types';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: '/api',
+  // Use VITE_API_URL from environment variables for production (e.g. Vercel), fallback to '/api' for local proxy
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json'
   }
