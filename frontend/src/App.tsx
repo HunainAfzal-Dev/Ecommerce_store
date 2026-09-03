@@ -142,9 +142,6 @@ function App() {
         {/* Global Floating Widgets */}
         <FloatingWidgets />
 
-        {/* Interactive AI Floating Assistant Pill */}
-        <AIAssistantPill />
-
         {/* Minimal Luxury Footer */}
         <footer className="bg-stone-950 text-stone-300 border-t border-stone-900 pt-14 pb-10 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
