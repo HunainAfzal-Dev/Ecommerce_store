@@ -99,13 +99,15 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
         </Link>
       </div>
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed md:sticky top-0 left-0 z-40 h-screen w-64 bg-stone-950 text-stone-300 border-r border-stone-900 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="p-6">
+      {/* Sidebar Wrapper to stretch background and fill gap */}
+      <div className="md:w-64 md:shrink-0 bg-stone-950">
+        {/* Sidebar */}
+        <aside
+          className={`fixed md:sticky top-0 left-0 z-40 h-screen w-64 bg-stone-950 text-stone-300 border-r border-stone-900 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="p-6">
           {/* Logo / Header */}
           <div className="flex items-center justify-between pb-6 border-b border-stone-800">
             <Link to="/" className="flex flex-col">
@@ -175,6 +177,7 @@ export default function AdminLayout({ children, title, subtitle, action }: Admin
           </div>
         </div>
       </aside>
+      </div>
 
       {/* Backdrop for mobile */}
       {sidebarOpen && (
