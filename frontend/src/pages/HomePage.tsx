@@ -1,11 +1,13 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard, { getCategoryTheme } from '../components/ProductCard';
 import Loader from '../components/Loader';
 import { productApi, categoryApi } from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { Sparkles, ArrowRight, ShieldCheck, Feather, Truck, RefreshCw } from 'lucide-react';
+import {
+  Sparkles, ArrowRight, ShieldCheck, Feather, Truck, RefreshCw, ChevronLeft, ChevronRight
+} from 'lucide-react';
 import type { Product, Category } from '../types';
 
 // Fallback editorial images for hero carousel
@@ -16,6 +18,192 @@ const editorialImages = [
   'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80',
 ];
 
+// Editorial scrollable carousel slides (before Featured Arrivals)
+const editorialSlides = [
+  {
+    img: '/editorial/carousel_2.jpg',
+    label: 'Selvedge Collection',
+    title: 'Raw Denim Chore Jacket',
+    desc: 'Artisanal Japanese selvedge denim. Built to age beautifully.',
+    tag: 'New Arrival',
+    tagColor: 'bg-blue-600',
+    cta: 'Shop Outerwear',
+  },
+  {
+    img: '/editorial/carousel_1.jpg',
+    label: 'Everyday Essentials',
+    title: 'Linen & Natural Fibers',
+    desc: 'Pure French flax linen. Breathable, sustainable, timeless.',
+    tag: 'Bestseller',
+    tagColor: 'bg-amber-600',
+    cta: 'Shop Linen',
+  },
+  {
+    img: '/editorial/carousel_3.jpg',
+    label: 'Festive Edit',
+    title: 'Handwoven Silk Shawls',
+    desc: 'Ceremonial-grade hand-embroidered silk. Limited quantities.',
+    tag: 'Limited Drop',
+    tagColor: 'bg-rose-600',
+    cta: 'Shop Festive',
+  },
+];
+
+/* ─────────────────────────────────────────────
+   Editorial Scrollable Carousel Component
+───────────────────────────────────────────── */
+function EditorialCarousel() {
+  const [active, setActive] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const resetInterval = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setActive((p) => (p + 1) % editorialSlides.length);
+    }, 5000);
+  }, []);
+
+  useEffect(() => {
+    resetInterval();
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [resetInterval]);
+
+  const goTo = (idx: number) => {
+    setActive(idx);
+    resetInterval();
+  };
+  const prev = () => goTo((active - 1 + editorialSlides.length) % editorialSlides.length);
+  const next = () => goTo((active + 1) % editorialSlides.length);
+
+  // Touch/drag support
+  const handleDragStart = (x: number) => { setIsDragging(true); setDragStartX(x); };
+  const handleDragEnd = (x: number) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const delta = dragStartX - x;
+    if (Math.abs(delta) > 50) { delta > 0 ? next() : prev(); }
+  };
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-indigo-500" />
+          <span className="text-xs font-bold uppercase tracking-widest text-indigo-700">Editorial</span>
+        </div>
+        <Link
+          to="/shop"
+          className="text-xs uppercase tracking-wider font-bold text-stone-700 hover:text-stone-950 transition flex items-center gap-1 group"
+        >
+          <span>Shop All</span>
+          <span className="group-hover:translate-x-1 transition-transform">→</span>
+        </Link>
+      </div>
+
+      {/* Carousel Container */}
+      <div
+        className="relative rounded-2xl sm:rounded-3xl overflow-hidden select-none"
+        style={{ aspectRatio: '21/8' }}
+        onMouseDown={(e) => handleDragStart(e.clientX)}
+        onMouseUp={(e) => handleDragEnd(e.clientX)}
+        onMouseLeave={() => setIsDragging(false)}
+        onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+        onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
+      >
+        {/* Slides */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="absolute inset-0"
+          >
+            <img
+              src={editorialSlides[active].img}
+              alt={editorialSlides[active].title}
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Text Overlay */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`text-${active}`}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="absolute inset-0 flex flex-col justify-center px-5 sm:px-10 lg:px-14 z-10"
+          >
+            {/* Tag pill */}
+            <span className={`inline-flex items-center self-start text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-white ${editorialSlides[active].tagColor} px-2.5 py-1 rounded-full mb-2 sm:mb-3`}>
+              {editorialSlides[active].tag}
+            </span>
+            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-white/70 font-bold mb-1">
+              {editorialSlides[active].label}
+            </p>
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-xs sm:max-w-sm">
+              {editorialSlides[active].title}
+            </h2>
+            <p className="text-[11px] sm:text-sm text-white/80 mt-2 max-w-xs leading-relaxed hidden sm:block">
+              {editorialSlides[active].desc}
+            </p>
+            <Link
+              to="/shop"
+              className="mt-3 sm:mt-5 self-start inline-flex items-center gap-2 bg-white text-stone-950 hover:bg-stone-100 transition text-[10px] sm:text-xs uppercase tracking-wider font-extrabold px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-md active:scale-95"
+            >
+              {editorialSlides[active].cta}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Prev / Next arrows — hidden on very small mobile */}
+        <button
+          onClick={prev}
+          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/40 transition hidden xs:flex"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/40 transition hidden xs:flex"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+
+        {/* Dot indicators */}
+        <div className="absolute bottom-3 sm:bottom-5 right-4 sm:right-6 z-20 flex items-center gap-1.5">
+          {editorialSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className={`rounded-full transition-all duration-300 ${
+                i === active ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main HomePage Component
+───────────────────────────────────────────── */
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -34,7 +222,7 @@ export default function HomePage() {
         setFeaturedProducts(productsRes.data.data.products || []);
         setCategories(categoriesRes.data.data.categories || []);
       } catch (err) {
-        console.error('Failed to load home data', err);
+        console.error('Failed to load home data:', err);
       } finally {
         setLoading(false);
       }
@@ -71,17 +259,17 @@ export default function HomePage() {
   if (loading) return <Loader message="Curating collection..." />;
 
   return (
-    <div className="space-y-12 sm:space-y-20 overflow-hidden">
+    <div className="space-y-10 sm:space-y-16 overflow-hidden pb-4">
       {/* 1. Editorial Hero Section with Floating Micro-Badges */}
       <section className="relative bg-[var(--color-surface-subtle)] border-b border-stone-200/90 overflow-hidden">
         {/* Ambient background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-28 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Content Column */}
-            <div className="lg:col-span-7 space-y-5 sm:space-y-7">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-6">
               <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] sm:text-xs uppercase tracking-widest font-extrabold px-3 py-1.5 rounded-full shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
                 <span>Autumn/Winter '26 Edition</span>
@@ -97,7 +285,7 @@ export default function HomePage() {
               </p>
 
               {/* Floating Quality Stickers */}
-              <div className="flex flex-wrap gap-2.5 pt-1">
+              <div className="flex flex-wrap gap-2 pt-1">
                 <motion.div
                   animate={{ y: [0, -4, 0] }}
                   transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
@@ -144,10 +332,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Hero Image Carousel */}
+            {/* Right Hero Image Carousel — desktop only */}
             <div className="lg:col-span-5 relative hidden lg:block">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-stone-200/90 bg-stone-100">
-                {/* Crossfading Image Carousel */}
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={heroIdx}
@@ -161,26 +348,21 @@ export default function HomePage() {
                   />
                 </AnimatePresence>
 
-                {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none z-[1]" />
 
-                {/* Carousel Dot Indicators */}
                 <div className="absolute top-4 right-4 z-[2] flex items-center gap-1.5">
                   {heroImages.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setHeroIdx(i)}
                       className={`rounded-full transition-all ${
-                        i === heroIdx
-                          ? 'w-5 h-1.5 bg-white'
-                          : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
+                        i === heroIdx ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
                       }`}
                       aria-label={`Show image ${i + 1}`}
                     />
                   ))}
                 </div>
 
-                {/* Floating Micro Badge on Image */}
                 <motion.div
                   animate={{ y: [0, -6, 0] }}
                   transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
@@ -210,15 +392,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. PRODUCT CARDS DIRECTLY BELOW HERO SECTION */}
+      {/* 2. Editorial Scrollable Carousel (NEW — before Featured Arrivals) */}
+      <EditorialCarousel />
+
+      {/* 3. Featured Arrivals */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 pb-3 border-b border-stone-200 gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 pb-3 border-b border-stone-200 gap-2">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
-                Latest Drop
-              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-700">Latest Drop</span>
             </div>
             <h2 className="text-2xl sm:text-3xl text-stone-950 font-extrabold tracking-tight mt-0.5">
               Featured Arrivals
@@ -234,7 +417,8 @@ export default function HomePage() {
         </div>
 
         {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+          /* Slightly smaller cards on mobile via reduced gap */
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5">
             {featuredProducts.slice(0, 8).map((product, idx) => (
               <ProductCard key={product.id} product={product} index={idx} />
             ))}
@@ -248,16 +432,14 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 3. Shop by Category Showcase */}
+      {/* 4. Shop by Category Showcase */}
       {categories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 pb-3 border-b border-stone-200 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 pb-3 border-b border-stone-200 gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                <span className="text-xs font-bold uppercase tracking-widest text-purple-700">
-                  Departments
-                </span>
+                <span className="text-xs font-bold uppercase tracking-widest text-purple-700">Departments</span>
               </div>
               <h2 className="text-2xl sm:text-3xl text-stone-950 font-extrabold tracking-tight mt-0.5">
                 Shop by Category
@@ -272,14 +454,14 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {categories.slice(0, 8).map((category, idx) => {
               const theme = getCategoryTheme(category.name, idx);
               return (
                 <Link
                   key={category.id}
                   to={`/shop?category=${category.id}`}
-                  className="group bg-white border border-stone-200/90 rounded-2xl p-4 sm:p-6 flex flex-col justify-between min-h-[140px] sm:min-h-[160px] hover:border-stone-400 shadow-xs hover:shadow-md active:bg-stone-50 transition-all duration-300 relative overflow-hidden"
+                  className="group bg-white border border-stone-200/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[120px] sm:min-h-[150px] hover:border-stone-400 shadow-xs hover:shadow-md active:bg-stone-50 transition-all duration-300 relative overflow-hidden"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
@@ -301,7 +483,7 @@ export default function HomePage() {
                   </div>
 
                   <div className={`pt-2 sm:pt-3 flex items-center justify-between text-[11px] sm:text-xs font-bold uppercase tracking-wider ${theme.text}`}>
-                    <span>Explore Department</span>
+                    <span>Explore</span>
                     <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
                   </div>
                 </Link>
@@ -311,20 +493,16 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* 4. Brand Value Pillars */}
+      {/* 5. Brand Value Pillars */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-8 shadow-xs">
           <div className="flex items-start gap-3.5 p-2">
             <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0">
               <Feather className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
-                Pure Natural Fabrics
-              </h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">
-                100% fine cottons, French flax linens, and breathable natural blends.
-              </p>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Pure Natural Fabrics</h3>
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">100% fine cottons, French flax linens, and breathable natural blends.</p>
             </div>
           </div>
 
@@ -333,12 +511,8 @@ export default function HomePage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
-                Artisanal Tailoring
-              </h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">
-                Meticulous cuts designed for drape, silhouette, and longevity.
-              </p>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Artisanal Tailoring</h3>
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">Meticulous cuts designed for drape, silhouette, and longevity.</p>
             </div>
           </div>
 
@@ -347,12 +521,8 @@ export default function HomePage() {
               <Truck className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
-                Express Shipping
-              </h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">
-                Complimentary nationwide delivery on orders over Rs. 5,000.
-              </p>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Express Shipping</h3>
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">Complimentary nationwide delivery on orders over Rs. 5,000.</p>
             </div>
           </div>
 
@@ -361,26 +531,20 @@ export default function HomePage() {
               <RefreshCw className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">
-                Doorstep Exchanges
-              </h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">
-                Hassle-free 7-day doorstep size replacement.
-              </p>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Doorstep Exchanges</h3>
+              <p className="text-xs text-stone-500 font-normal leading-relaxed">Hassle-free 7-day doorstep size replacement.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Brand Ethos Story Banner */}
+      {/* 6. Brand Ethos Story Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-[var(--color-primary)] text-white p-7 sm:p-12 lg:p-16 rounded-3xl grid md:grid-cols-2 gap-6 sm:gap-8 items-center shadow-xl">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[var(--color-accent)]"></span>
-              <span className="text-xs uppercase tracking-widest text-[var(--color-accent-border)] font-bold">
-                The Atelier Philosophy
-              </span>
+              <span className="text-xs uppercase tracking-widest text-[var(--color-accent-border)] font-bold">The Atelier Philosophy</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
               Designed for ease. <br />
@@ -403,11 +567,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. Minimalist Newsletter */}
-      <section className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-center space-y-3">
-        <span className="text-xs uppercase tracking-widest text-blue-600 font-bold">
-          Stay Connected
-        </span>
+      {/* 7. Minimalist Newsletter */}
+      <section className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-4 text-center space-y-3">
+        <span className="text-xs uppercase tracking-widest text-blue-600 font-bold">Stay Connected</span>
         <h2 className="text-2xl sm:text-3xl text-stone-950 font-extrabold tracking-tight">
           Receive Early Access to Releases
         </h2>

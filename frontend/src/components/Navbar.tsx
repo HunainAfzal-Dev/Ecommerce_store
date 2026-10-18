@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { ShoppingBag, Search, Menu, X, Shield, ArrowRight } from 'lucide-react';
+import {
+  ShoppingBag, Search, Menu, X, Shield, ArrowRight,
+  Clock, Heart, Ruler, Globe, ChevronDown, Eye
+} from 'lucide-react';
+import {
+  getRecentlyViewedCount, getWishlistCount,
+  getRecentlyViewed, getWishlist, removeFromWishlist
+} from './FloatingWidgets';
+import type { WidgetItem } from './FloatingWidgets';
 
 const tickerAnnouncements = [
   "⚡ NEW SEASON EDITION LIVE",
@@ -14,6 +22,219 @@ const tickerAnnouncements = [
   "CASH ON DELIVERY (COD) AVAILABLE NATIONWIDE"
 ];
 
+/* ──────────────────────────────────────────────────────────────
+   Mobile Widget Tools (embedded inside the sidebar drawer)
+   ────────────────────────────────────────────────────────────── */
+function MobileWidgetTools({ onClose }: { onClose: () => void }) {
+  const [activeTab, setActiveTab] = useState<'recent' | 'wishlist' | 'size' | 'currency'>('recent');
+  const [recentItems, setRecentItems] = useState<WidgetItem[]>(getRecentlyViewed());
+  const [wishItems, setWishItems] = useState<WidgetItem[]>(getWishlist());
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [sizeResult, setSizeResult] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<'PKR' | 'USD' | 'GBP'>('PKR');
+
+  useEffect(() => {
+    const rr = () => setRecentItems(getRecentlyViewed());
+    const rw = () => setWishItems(getWishlist());
+    window.addEventListener('recently-viewed-updated', rr);
+    window.addEventListener('wishlist-updated', rw);
+    return () => {
+      window.removeEventListener('recently-viewed-updated', rr);
+      window.removeEventListener('wishlist-updated', rw);
+    };
+  }, []);
+
+  const calcSize = () => {
+    const h = parseInt(height);
+    const w = parseInt(weight);
+    if (isNaN(h) || isNaN(w)) return;
+    const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    let idx = w < 55 ? 0 : w < 65 ? 1 : w < 75 ? 2 : w < 88 ? 3 : w < 100 ? 4 : 5;
+    if (h > 185 && idx < 5) idx++;
+    if (h < 165 && idx > 0) idx--;
+    setSizeResult(sizes[idx]);
+  };
+
+  const rates: Record<string, { symbol: string; rate: number; label: string }> = {
+    PKR: { symbol: 'Rs.', rate: 1, label: 'Pakistani Rupee' },
+    USD: { symbol: '$', rate: 0.0036, label: 'US Dollar' },
+    GBP: { symbol: '£', rate: 0.0028, label: 'British Pound' },
+  };
+
+  const tabs = [
+    { id: 'recent' as const, icon: Clock, label: 'History', count: recentItems.length },
+    { id: 'wishlist' as const, icon: Heart, label: 'Wishlist', count: wishItems.length },
+    { id: 'size' as const, icon: Ruler, label: 'Sizes', count: 0 },
+    { id: 'currency' as const, icon: Globe, label: 'Currency', count: 0 },
+  ];
+
+  return (
+    <div className="mt-2 mx-1 bg-stone-50 border border-stone-200 rounded-2xl overflow-hidden">
+      {/* Tab Bar */}
+      <div className="flex border-b border-stone-200">
+        {tabs.map(({ id, icon: Icon, label, count }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex-1 flex flex-col items-center py-2.5 gap-0.5 text-[9px] font-bold uppercase tracking-wider transition relative ${
+              activeTab === id ? 'text-[var(--color-accent)] bg-white' : 'text-stone-400 hover:text-stone-700'
+            }`}
+          >
+            <span className="relative">
+              <Icon className="w-4 h-4" />
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1.5 w-3.5 h-3.5 rounded-full bg-[var(--color-accent)] text-white text-[7px] font-extrabold flex items-center justify-center">
+                  {count > 9 ? '9+' : count}
+                </span>
+              )}
+            </span>
+            {label}
+            {activeTab === id && (
+              <motion.div layoutId="mobile-widget-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-accent)]" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Panels */}
+      <div className="p-3">
+        {/* Recently Viewed */}
+        {activeTab === 'recent' && (
+          <div className="space-y-1.5">
+            {recentItems.length === 0 ? (
+              <p className="text-[11px] text-stone-400 py-4 text-center">Browse the collection to see your history here.</p>
+            ) : (
+              recentItems.slice(0, 5).map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/product/${item.id}`}
+                  onClick={onClose}
+                  className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white transition group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
+                    {item.image_url
+                      ? <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center text-stone-300"><Eye className="w-3 h-3" /></div>}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-bold text-stone-800 truncate">{item.name}</p>
+                    <p className="text-[10px] text-stone-500">Rs. {item.price.toLocaleString()}</p>
+                  </div>
+                  <ChevronDown className="w-3 h-3 text-stone-300 shrink-0 -rotate-90" />
+                </Link>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Wishlist */}
+        {activeTab === 'wishlist' && (
+          <div className="space-y-1.5">
+            {wishItems.length === 0 ? (
+              <p className="text-[11px] text-stone-400 py-4 text-center">Tap ❤️ on any product to save it here.</p>
+            ) : (
+              wishItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white transition">
+                  <Link to={`/product/${item.id}`} onClick={onClose} className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-lg bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
+                      {item.image_url
+                        ? <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-stone-300"><Heart className="w-3 h-3" /></div>}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-bold text-stone-800 truncate">{item.name}</p>
+                      <p className="text-[10px] text-stone-500">Rs. {item.price.toLocaleString()}</p>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => { removeFromWishlist(item.id); setWishItems(getWishlist()); }}
+                    className="p-1 text-stone-300 hover:text-rose-500 transition shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Size Finder */}
+        {activeTab === 'size' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-stone-500 font-bold">Height (cm)</label>
+                <input
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  placeholder="175"
+                  className="w-full mt-1 px-2.5 py-2 border border-stone-200 rounded-lg text-xs text-stone-900 bg-white focus:outline-none focus:border-stone-400"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-stone-500 font-bold">Weight (kg)</label>
+                <input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder="70"
+                  className="w-full mt-1 px-2.5 py-2 border border-stone-200 rounded-lg text-xs text-stone-900 bg-white focus:outline-none focus:border-stone-400"
+                />
+              </div>
+            </div>
+            <button
+              onClick={calcSize}
+              className="w-full py-2 bg-[var(--color-primary)] text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-[var(--color-primary-hover)] transition active:scale-[0.98]"
+            >
+              Find My Size
+            </button>
+            {sizeResult && (
+              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold">Recommended</p>
+                <p className="text-2xl font-extrabold text-emerald-800">{sizeResult}</p>
+                <p className="text-[10px] text-emerald-600 mt-0.5">Based on {height}cm / {weight}kg</p>
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        {/* Currency Guide */}
+        {activeTab === 'currency' && (
+          <div className="space-y-2">
+            {Object.entries(rates).map(([code, { label }]) => (
+              <button
+                key={code}
+                onClick={() => setCurrency(code as 'PKR' | 'USD' | 'GBP')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition ${
+                  currency === code
+                    ? 'bg-[var(--color-primary)] text-white font-bold'
+                    : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+                }`}
+              >
+                <span>{code}</span>
+                <span className="text-[10px]">{label}</span>
+              </button>
+            ))}
+            <div className="bg-white border border-stone-200 rounded-xl p-3 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-stone-500 font-bold">Example</p>
+              <p className="text-sm font-extrabold text-stone-900 mt-0.5">
+                Rs. 5,000 ≈ {rates[currency].symbol} {(5000 * rates[currency].rate).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-[9px] text-stone-400 mt-1">Approx. rate • Checkout always in PKR</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Main Navbar Component
+   ────────────────────────────────────────────────────────────── */
 export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { cartCount } = useCart();
@@ -21,6 +242,11 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [widgetsOpen, setWidgetsOpen] = useState(false);
+  const [recentCount, setRecentCount] = useState(getRecentlyViewedCount());
+  const [wishCount, setWishCount] = useState(getWishlistCount());
+  // Suppress unused-variable lints — counts used in UI via count badges in widget tools
+  void recentCount; void wishCount;
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -34,10 +260,20 @@ export default function Navbar() {
     } else {
       document.body.style.overflow = '';
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
+
+  // Sync widget counts from storage events
+  useEffect(() => {
+    const refreshRecent = () => setRecentCount(getRecentlyViewedCount());
+    const refreshWish = () => setWishCount(getWishlistCount());
+    window.addEventListener('recently-viewed-updated', refreshRecent);
+    window.addEventListener('wishlist-updated', refreshWish);
+    return () => {
+      window.removeEventListener('recently-viewed-updated', refreshRecent);
+      window.removeEventListener('wishlist-updated', refreshWish);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -49,9 +285,10 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <>
+    /* sticky wrapper — wraps BOTH the ticker AND the header so they scroll together then stick */
+    <div className="sticky top-0 z-40">
       {/* 1. Animated Continuous Running Marquee Ticker */}
-      <div className="bg-[var(--color-primary)] text-stone-200 py-2 border-b border-stone-800 select-none overflow-hidden relative z-40">
+      <div className="bg-[var(--color-primary)] text-stone-200 py-1.5 border-b border-stone-800 select-none overflow-hidden relative">
         <div className="animate-marquee flex items-center space-x-10 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">
           {[...tickerAnnouncements, ...tickerAnnouncements].map((item, idx) => (
             <div key={idx} className="flex items-center space-x-3 shrink-0">
@@ -64,9 +301,9 @@ export default function Navbar() {
       </div>
 
       {/* 2. Main Navigation Header */}
-      <header className="sticky top-0 z-40 bg-[var(--color-background)]/95 backdrop-blur-md border-b border-stone-200/90 transition-all">
+      <header className="bg-[var(--color-background)]/97 backdrop-blur-md border-b border-stone-200/90 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+          <div className="flex items-center justify-between h-14 sm:h-18">
             {/* Mobile Menu Button */}
             <div className="flex items-center md:hidden">
               <button
@@ -85,7 +322,7 @@ export default function Navbar() {
                 <span className="font-extrabold text-lg sm:text-2xl tracking-[0.14em] uppercase text-stone-950 group-hover:text-[var(--color-accent)] transition-colors">
                   Garments Store
                 </span>
-                <span className="text-[9px] sm:text-[10px] tracking-[0.22em] uppercase font-bold text-[var(--color-accent)] -mt-1 hidden xs:block">
+                <span className="text-[9px] sm:text-[10px] tracking-[0.22em] uppercase font-bold text-[var(--color-accent)] -mt-1 hidden sm:block">
                   Atelier &bull; Ready-to-Wear
                 </span>
               </Link>
@@ -146,7 +383,6 @@ export default function Navbar() {
 
             {/* Right Action Icons */}
             <div className="flex items-center space-x-1.5 sm:space-x-4">
-              {/* Quick Search Trigger */}
               <Link
                 to="/shop"
                 className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-stone-800 hover:text-[var(--color-accent)] active:bg-stone-100 rounded-xl transition"
@@ -156,7 +392,6 @@ export default function Navbar() {
                 <Search className="w-5 h-5 stroke-[1.7]" />
               </Link>
 
-              {/* Shopping Bag with Animated Counter */}
               <Link
                 to="/cart"
                 className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-stone-800 hover:text-[var(--color-accent)] active:bg-stone-100 rounded-xl transition"
@@ -175,12 +410,9 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* Desktop Account Dropdown / Actions */}
               {isAuthenticated ? (
                 <div className="hidden md:flex items-center space-x-3 pl-3 border-l border-stone-200">
-                  <span className="text-xs font-bold text-stone-800">
-                    {user?.name?.split(' ')[0]}
-                  </span>
+                  <span className="text-xs font-bold text-stone-800">{user?.name?.split(' ')[0]}</span>
                   <button
                     onClick={handleLogout}
                     className="text-xs uppercase tracking-wider font-bold text-stone-500 hover:text-red-700 transition"
@@ -218,7 +450,7 @@ export default function Navbar() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+                className="fixed inset-0 bg-black/60 backdrop-blur-xs"
               />
 
               {/* Drawer Content */}
@@ -226,14 +458,14 @@ export default function Navbar() {
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="relative w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between p-6 z-10 overflow-y-auto"
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="relative w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-hidden"
               >
-                <div className="space-y-6">
-                  {/* Header inside drawer */}
-                  <div className="flex items-center justify-between pb-4 border-b border-stone-200">
+                {/* Drawer Header — sticky */}
+                <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-stone-100 bg-white">
+                  <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="font-extrabold text-lg tracking-wider uppercase text-stone-950">
+                      <span className="font-extrabold text-base tracking-wider uppercase text-stone-950">
                         Garments Store
                       </span>
                       <span className="text-[9px] uppercase tracking-widest font-bold text-[var(--color-accent)]">
@@ -248,9 +480,12 @@ export default function Navbar() {
                       <X className="w-5 h-5" />
                     </button>
                   </div>
+                </div>
 
-                  {/* Navigation Links with large 48px touch targets */}
-                  <nav className="space-y-1.5">
+                {/* Scrollable body */}
+                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+                  {/* Navigation Links */}
+                  <nav className="space-y-1">
                     <Link
                       to="/"
                       onClick={() => setMobileMenuOpen(false)}
@@ -302,10 +537,42 @@ export default function Navbar() {
                       </Link>
                     )}
                   </nav>
+
+                  {/* Divider */}
+                  <div className="pt-2 pb-1">
+                    <div className="h-px bg-stone-100" />
+                  </div>
+
+                  {/* ── Mobile Widgets Expandable Section ── */}
+                  <div>
+                    <button
+                      onClick={() => setWidgetsOpen(!widgetsOpen)}
+                      className="w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm uppercase tracking-wider font-bold text-stone-600 hover:bg-stone-50 transition"
+                    >
+                      <span>Quick Tools</span>
+                      <motion.span animate={{ rotate: widgetsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                        <ChevronDown className="w-4 h-4 text-stone-400" />
+                      </motion.span>
+                    </button>
+
+                    <AnimatePresence>
+                      {widgetsOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease: 'easeOut' }}
+                          className="overflow-hidden"
+                        >
+                          <MobileWidgetTools onClose={() => setMobileMenuOpen(false)} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
-                {/* Bottom Auth Section */}
-                <div className="pt-6 border-t border-stone-200 space-y-3">
+                {/* Bottom Auth Section — sticky */}
+                <div className="flex-shrink-0 px-4 pb-6 pt-4 border-t border-stone-100 space-y-3">
                   {isAuthenticated ? (
                     <div className="space-y-3">
                       <div className="bg-[var(--color-surface-subtle)] p-3.5 rounded-xl border border-stone-200/80">
@@ -344,6 +611,6 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </header>
-    </>
+    </div>
   );
 }

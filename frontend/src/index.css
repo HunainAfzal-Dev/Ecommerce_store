@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* ============================================================
+   CUSTOM BREAKPOINTS (below Tailwind's sm:640px)
+   ============================================================ */
+@custom-variant xs (&:where(.xs, .xs *));
+
+@layer utilities {
+  @media (min-width: 480px) {
+    .xs\:block  { display: block; }
+    .xs\:flex   { display: flex; }
+    .xs\:hidden { display: none; }
+  }
+}
+
 @layer base {
   :root {
     /* ============================================================
@@ -32,31 +45,26 @@
     --color-accent-border: #eddcd3;       /* Accent border tint */
 
     /* 3. Semantic Status & Feedback */
-    /* Success: Positive, Delivered, In Stock, Active */
     --color-success: #059669;
     --color-success-hover: #047857;
     --color-success-bg: #ecfdf5;
     --color-success-border: #a7f3d0;
 
-    /* Warning: Pending, Low Stock, Attention */
     --color-warning: #d97706;
     --color-warning-hover: #b45309;
     --color-warning-bg: #fffbeb;
     --color-warning-border: #fde68a;
 
-    /* Danger: Cancelled, Sold Out, Errors, Destructive Actions */
     --color-danger: #dc2626;
     --color-danger-hover: #b91c1c;
     --color-danger-bg: #fef2f2;
     --color-danger-border: #fecaca;
 
-    /* Info: Processing, Client Roles, Informational notes */
     --color-info: #2563eb;
     --color-info-hover: #1d4ed8;
     --color-info-bg: #eff6ff;
     --color-info-border: #bfdbfe;
 
-    /* Special / Admin / Shipped: Purple / Indigo */
     --color-special: #7c3aed;
     --color-special-hover: #6d28d9;
     --color-special-bg: #f5f3ff;
@@ -84,11 +92,11 @@
     --color-stat-revenue-border: #a7f3d0;
 
     /* 5. Border Radius Tokens */
-    --radius-sm: 0.375rem;                /* 6px */
-    --radius-md: 0.5rem;                  /* 8px */
-    --radius-lg: 0.75rem;                 /* 12px */
-    --radius-xl: 1rem;                    /* 16px */
-    --radius-2xl: 1.25rem;                /* 20px */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.25rem;
 
     /* 6. Typography */
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -122,67 +130,41 @@
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-dark); }
 
-::-webkit-scrollbar-track {
-  background: var(--color-background);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-hover);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-dark);
-}
-
-/* Continuous Marquee Animation */
+/* ── Continuous Marquee Animation ── */
 @keyframes marquee {
-  0% { transform: translateX(0%); }
+  0%   { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
 }
-
 .animate-marquee {
   display: flex;
   width: max-content;
   animation: marquee 35s linear infinite;
 }
+.animate-marquee:hover { animation-play-state: paused; }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
-/* Soft floating badge animation */
+/* ── Soft floating badge animation ── */
 @keyframes floatSoft {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
 }
+.animate-float-soft { animation: floatSoft 4s ease-in-out infinite; }
 
-.animate-float-soft {
-  animation: floatSoft 4s ease-in-out infinite;
-}
-
-/* Subtle micro animations */
+/* ── Fade in ── */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-in { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-.animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* ── xs breakpoint responsive utilities ── */
+@media (min-width: 480px) {
+  .xs\:block  { display: block !important; }
+  .xs\:flex   { display: flex !important; }
+  .xs\:hidden { display: none !important; }
 }
