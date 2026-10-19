@@ -136,6 +136,9 @@
 ::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-border-dark); }
 
+/* Carousel track — hide scrollbar entirely (webkit) */
+.carousel-track::-webkit-scrollbar { display: none; }
+
 /* ── Continuous Marquee Animation ── */
 @keyframes marquee {
   0%   { transform: translateX(0%); }

@@ -5,12 +5,14 @@ import ProductCard, { getCategoryTheme } from '../components/ProductCard';
 import Loader from '../components/Loader';
 import { productApi, categoryApi } from '../api/client';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import {
-  Sparkles, ArrowRight, ShieldCheck, Feather, Truck, RefreshCw, ChevronLeft, ChevronRight
+  Sparkles, ArrowRight, ShieldCheck, Feather, Truck, RefreshCw,
+  ChevronLeft, ChevronRight, ShoppingBag as BagIcon
 } from 'lucide-react';
 import type { Product, Category } from '../types';
 
-// Fallback editorial images for hero carousel
+// Fallback editorial images used in the right-column desktop hero
 const editorialImages = [
   'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80',
   'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80',
@@ -18,191 +20,272 @@ const editorialImages = [
   'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80',
 ];
 
-// Editorial scrollable carousel slides (before Featured Arrivals)
-const editorialSlides = [
-  {
-    img: '/editorial/carousel_2.jpg',
-    label: 'Selvedge Collection',
-    title: 'Raw Denim Chore Jacket',
-    desc: 'Artisanal Japanese selvedge denim. Built to age beautifully.',
-    tag: 'New Arrival',
-    tagColor: 'bg-blue-600',
-    cta: 'Shop Outerwear',
-  },
-  {
-    img: '/editorial/carousel_1.jpg',
-    label: 'Everyday Essentials',
-    title: 'Linen & Natural Fibers',
-    desc: 'Pure French flax linen. Breathable, sustainable, timeless.',
-    tag: 'Bestseller',
-    tagColor: 'bg-amber-600',
-    cta: 'Shop Linen',
-  },
-  {
-    img: '/editorial/carousel_3.jpg',
-    label: 'Festive Edit',
-    title: 'Handwoven Silk Shawls',
-    desc: 'Ceremonial-grade hand-embroidered silk. Limited quantities.',
-    tag: 'Limited Drop',
-    tagColor: 'bg-rose-600',
-    cta: 'Shop Festive',
-  },
-];
-
-/* ─────────────────────────────────────────────
-   Editorial Scrollable Carousel Component
+/* ─────────────────────────────────────────────────────────────────
+   Compact Product Card — used ONLY inside the carousel track.
+   Slightly narrower than the full grid ProductCard to let 1.5–4
+   cards be visible at once depending on viewport width.
 ───────────────────────────────────────────── */
-function EditorialCarousel() {
-  const [active, setActive] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStartX, setDragStartX] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+function CarouselProductCard({
+  product,
+  index,
+}: {
+  product: Product;
+  index: number;
+}) {
+  const theme = getCategoryTheme(product.categories?.name, index);
+  const isOutOfStock = product.stock_quantity <= 0;
+  const isLowStock = product.stock_quantity > 0 && product.stock_quantity <= 3;
+  const { addItem } = useCart();
+  const { showToast } = useToast();
 
-  const resetInterval = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      setActive((p) => (p + 1) % editorialSlides.length);
-    }, 5000);
-  }, []);
-
-  useEffect(() => {
-    resetInterval();
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [resetInterval]);
-
-  const goTo = (idx: number) => {
-    setActive(idx);
-    resetInterval();
-  };
-  const prev = () => goTo((active - 1 + editorialSlides.length) % editorialSlides.length);
-  const next = () => goTo((active + 1) % editorialSlides.length);
-
-  // Touch/drag support
-  const handleDragStart = (x: number) => { setIsDragging(true); setDragStartX(x); };
-  const handleDragEnd = (x: number) => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const delta = dragStartX - x;
-    if (Math.abs(delta) > 50) { delta > 0 ? next() : prev(); }
+  const handleAddToBag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOutOfStock) return;
+    try {
+      addItem({ product_id: String(product.id), quantity: 1 });
+      showToast(`"${product.name}" added to your bag.`, 'success');
+    } catch {
+      showToast('Could not add item. Please try again.', 'error');
+    }
   };
 
   return (
+    <Link
+      to={`/product/${product.id}`}
+      /* clamp keeps cards at ~160 px on tiny phones, grows to 210 px on
+         larger phones, and the container's fixed column approach takes
+         over from md upward via the track's flex layout. */
+      className="group flex-shrink-0 flex flex-col bg-white border border-stone-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
+      style={{ scrollSnapAlign: 'start', width: 'clamp(158px, 60vw, 210px)' }}
+    >
+      {/* ── Thumbnail ── */}
+      <div className="relative aspect-[3/4] bg-[#f7f5f1] overflow-hidden flex-shrink-0">
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-stone-300">
+            <svg className="w-10 h-10 stroke-[1.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+        )}
+
+        {/* Category badge — top left */}
+        <span
+          className={`absolute top-2 left-2 inline-flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider
+            ${theme.text} ${theme.bg} border ${theme.border} px-2 py-0.5 rounded-md shadow-xs`}
+        >
+          <span className={`w-1 h-1 rounded-full ${theme.dot}`} />
+          {product.categories?.name || 'Garment'}
+        </span>
+
+        {/* Stock badge — top right */}
+        <span
+          className={`absolute top-2 right-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md shadow-xs ${
+            isOutOfStock
+              ? 'bg-red-50 text-red-600 border border-red-200'
+              : isLowStock
+              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          }`}
+        >
+          {isOutOfStock ? 'Sold Out' : isLowStock ? `${product.stock_quantity} left` : 'In Stock'}
+        </span>
+
+        {/* Add-to-bag — revealed on hover (desktop) */}
+        <button
+          onClick={handleAddToBag}
+          disabled={isOutOfStock}
+          className={`absolute bottom-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center shadow-md
+            opacity-0 group-hover:opacity-100 translate-y-1.5 group-hover:translate-y-0
+            transition-all duration-200 ease-out hidden sm:flex
+            ${isOutOfStock
+              ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
+              : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] active:scale-95'
+            }`}
+          aria-label="Add to bag"
+          title={isOutOfStock ? 'Sold out' : 'Add to bag'}
+        >
+          <BagIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* ── Info row ── */}
+      <div className="p-2.5 flex flex-col flex-1 justify-between">
+        <p
+          className={`text-[11px] sm:text-xs font-bold text-stone-900 leading-snug line-clamp-2 ${theme.hoverText} transition-colors`}
+        >
+          {product.name}
+        </p>
+
+        <div className="flex items-center justify-between pt-1.5 mt-1.5 border-t border-stone-100">
+          <span className="text-xs sm:text-sm font-extrabold text-stone-950 tracking-tight">
+            Rs.&nbsp;{product.price.toLocaleString()}
+          </span>
+
+          {/* Always-visible bag button on mobile (no hover needed) */}
+          <button
+            onClick={handleAddToBag}
+            disabled={isOutOfStock}
+            className={`sm:hidden w-7 h-7 rounded-full flex items-center justify-center shadow-xs active:scale-95 transition-transform
+              ${isOutOfStock
+                ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                : 'bg-[var(--color-primary)] text-white'
+              }`}
+            aria-label="Add to bag"
+          >
+            <BagIcon className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Multi-Card Product Carousel
+   ─ Mobile  : ~1.5 cards visible (scroll-snap mandatory)
+   ─ Tablet  : ~2.5 cards
+   ─ Desktop : ~4 cards
+   ─ Left / Right arrow buttons appear when scroll is possible
+   ─ Smooth CSS scroll-snap + native touch/swipe
+───────────────────────────────────────────── */
+function ProductCarousel({ products }: { products: Product[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const syncArrows = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 8);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
+  }, []);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    syncArrows();
+    el.addEventListener('scroll', syncArrows, { passive: true });
+    window.addEventListener('resize', syncArrows);
+    return () => {
+      el.removeEventListener('scroll', syncArrows);
+      window.removeEventListener('resize', syncArrows);
+    };
+  }, [syncArrows, products]);
+
+  const scrollByCard = (dir: 'left' | 'right') => {
+    const el = trackRef.current;
+    if (!el) return;
+    const firstCard = el.querySelector('[style*="scroll-snap-align"]') as HTMLElement | null;
+    const gap = 12; // matches gap-3 (12px)
+    const step = firstCard ? firstCard.offsetWidth + gap : 190;
+    el.scrollBy({ left: dir === 'right' ? step : -step, behavior: 'smooth' });
+  };
+
+  if (products.length === 0) return null;
+
+  return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Section header */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-indigo-500" />
-          <span className="text-xs font-bold uppercase tracking-widest text-indigo-700">Editorial</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-indigo-700">
+            Trending Now
+          </span>
         </div>
         <Link
           to="/shop"
           className="text-xs uppercase tracking-wider font-bold text-stone-700 hover:text-stone-950 transition flex items-center gap-1 group"
         >
-          <span>Shop All</span>
+          <span>View All</span>
           <span className="group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
 
-      {/* Carousel Container */}
-      <div
-        className="relative rounded-2xl sm:rounded-3xl overflow-hidden select-none"
-        style={{ aspectRatio: '21/8' }}
-        onMouseDown={(e) => handleDragStart(e.clientX)}
-        onMouseUp={(e) => handleDragEnd(e.clientX)}
-        onMouseLeave={() => setIsDragging(false)}
-        onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-        onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
-      >
-        {/* Slides */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
-            className="absolute inset-0"
-          >
-            <img
-              src={editorialSlides[active].img}
-              alt={editorialSlides[active].title}
-              className="w-full h-full object-cover object-center"
-              loading="eager"
-            />
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Text Overlay */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`text-${active}`}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="absolute inset-0 flex flex-col justify-center px-5 sm:px-10 lg:px-14 z-10"
-          >
-            {/* Tag pill */}
-            <span className={`inline-flex items-center self-start text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-white ${editorialSlides[active].tagColor} px-2.5 py-1 rounded-full mb-2 sm:mb-3`}>
-              {editorialSlides[active].tag}
-            </span>
-            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-white/70 font-bold mb-1">
-              {editorialSlides[active].label}
-            </p>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-xs sm:max-w-sm">
-              {editorialSlides[active].title}
-            </h2>
-            <p className="text-[11px] sm:text-sm text-white/80 mt-2 max-w-xs leading-relaxed hidden sm:block">
-              {editorialSlides[active].desc}
-            </p>
-            <Link
-              to="/shop"
-              className="mt-3 sm:mt-5 self-start inline-flex items-center gap-2 bg-white text-stone-950 hover:bg-stone-100 transition text-[10px] sm:text-xs uppercase tracking-wider font-extrabold px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-md active:scale-95"
+      {/* Carousel wrapper */}
+      <div className="relative">
+        {/* ── Left Arrow ── */}
+        <AnimatePresence>
+          {canLeft && (
+            <motion.button
+              key="carousel-left"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => scrollByCard('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 z-10
+                w-10 h-10 rounded-full bg-white border border-stone-200 shadow-lg
+                items-center justify-center text-stone-700 hover:text-stone-950
+                hover:shadow-xl transition-all duration-200 active:scale-90
+                hidden sm:flex"
+              aria-label="Scroll left"
             >
-              {editorialSlides[active].cta}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </motion.div>
+              <ChevronLeft className="w-5 h-5" />
+            </motion.button>
+          )}
         </AnimatePresence>
 
-        {/* Prev / Next arrows — hidden on very small mobile */}
-        <button
-          onClick={prev}
-          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/40 transition hidden xs:flex"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-        <button
-          onClick={next}
-          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/40 transition hidden xs:flex"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
+        {/* ── Right Arrow ── */}
+        <AnimatePresence>
+          {canRight && (
+            <motion.button
+              key="carousel-right"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => scrollByCard('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 z-10
+                w-10 h-10 rounded-full bg-white border border-stone-200 shadow-lg
+                items-center justify-center text-stone-700 hover:text-stone-950
+                hover:shadow-xl transition-all duration-200 active:scale-90
+                hidden sm:flex"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </motion.button>
+          )}
+        </AnimatePresence>
 
-        {/* Dot indicators */}
-        <div className="absolute bottom-3 sm:bottom-5 right-4 sm:right-6 z-20 flex items-center gap-1.5">
-          {editorialSlides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === active ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
+        {/* ── Scrollable track ── */}
+        <div
+          ref={trackRef}
+          className="flex gap-3 overflow-x-auto pb-2 carousel-track"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',        /* Firefox */
+            msOverflowStyle: 'none',       /* IE 11 */
+          }}
+        >
+          {products.map((p, i) => (
+            <CarouselProductCard key={p.id} product={p} index={i} />
           ))}
+          {/* Trailing spacer so last card isn't edge-flush */}
+          <div className="flex-shrink-0 w-1" aria-hidden="true" />
         </div>
+
+        {/* Edge-fade masks so cards fade out smoothly at each side */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-8
+          bg-gradient-to-r from-[var(--color-background)] to-transparent z-[1]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8
+          bg-gradient-to-l from-[var(--color-background)] to-transparent z-[1]" />
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────
-   Main HomePage Component
+/* ─────────────────────────────────────────────────────────────────
+   Main HomePage
 ───────────────────────────────────────────── */
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -217,7 +300,7 @@ export default function HomePage() {
       try {
         const [productsRes, categoriesRes] = await Promise.all([
           productApi.getAll(),
-          categoryApi.getAll()
+          categoryApi.getAll(),
         ]);
         setFeaturedProducts(productsRes.data.data.products || []);
         setCategories(categoriesRes.data.data.categories || []);
@@ -230,7 +313,7 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  // Build hero carousel images: product images first, then editorial fallbacks
+  // Build hero image list: real product images first, then editorial fallbacks
   const heroImages = useMemo(() => {
     const productImgs = featuredProducts
       .filter((p) => p.image_url)
@@ -240,13 +323,11 @@ export default function HomePage() {
     return [...productImgs, ...editorialImages].slice(0, 5);
   }, [featuredProducts]);
 
-  // Auto-advance hero carousel
+  // Auto-advance the right-column desktop hero image
   useEffect(() => {
     if (heroImages.length <= 1) return;
-    const interval = setInterval(() => {
-      setHeroIdx((prev) => (prev + 1) % heroImages.length);
-    }, 4000);
-    return () => clearInterval(interval);
+    const id = setInterval(() => setHeroIdx((p) => (p + 1) % heroImages.length), 4000);
+    return () => clearInterval(id);
   }, [heroImages.length]);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -260,61 +341,54 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10 sm:space-y-16 overflow-hidden pb-4">
-      {/* 1. Editorial Hero Section with Floating Micro-Badges */}
+
+      {/* ① Editorial Hero */}
       <section className="relative bg-[var(--color-surface-subtle)] border-b border-stone-200/90 overflow-hidden">
-        {/* Ambient background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Left Content Column */}
+
+            {/* Left copy */}
             <div className="lg:col-span-7 space-y-4 sm:space-y-6">
               <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] sm:text-xs uppercase tracking-widest font-extrabold px-3 py-1.5 rounded-full shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-                <span>Autumn/Winter '26 Edition</span>
+                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                <span>Autumn / Winter '26 Edition</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl text-stone-950 font-extrabold tracking-tight leading-[1.12]">
-                Refined Silhouettes, <br />
+                Refined Silhouettes,{' '}
+                <br />
                 <span className="text-[var(--color-accent)] font-bold">Timeless Comfort</span>
               </h1>
 
               <p className="text-xs sm:text-base text-stone-600 font-normal leading-relaxed max-w-xl">
-                Explore our curated ready-to-wear collection crafted from 100% pure French Flax linen, compact Egyptian cotton, and raw selvedge denim—tailored for effortless everyday luxury.
+                Explore our curated ready-to-wear collection crafted from 100% pure French Flax
+                linen, compact Egyptian cotton, and raw selvedge denim—tailored for effortless
+                everyday luxury.
               </p>
 
-              {/* Floating Quality Stickers */}
+              {/* Floating quality stickers */}
               <div className="flex flex-wrap gap-2 pt-1">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-xs text-[11px] font-bold text-stone-800"
-                >
-                  <Feather className="w-3.5 h-3.5 text-amber-600" />
-                  <span>100% Breathable Linen</span>
-                </motion.div>
-
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut', delay: 0.5 }}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-xs text-[11px] font-bold text-stone-800"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Reinforced Seam Durability</span>
-                </motion.div>
-
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ repeat: Infinity, duration: 3.8, ease: 'easeInOut', delay: 1 }}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-xs text-[11px] font-bold text-stone-800"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Handcrafted Tailoring</span>
-                </motion.div>
+                {[
+                  { icon: <Feather className="w-3.5 h-3.5 text-amber-600" />, label: '100% Breathable Linen', delay: 0 },
+                  { icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />, label: 'Reinforced Seam Durability', delay: 0.5 },
+                  { icon: <Sparkles className="w-3.5 h-3.5 text-indigo-600" />, label: 'Handcrafted Tailoring', delay: 1 },
+                ].map(({ icon, label, delay }) => (
+                  <motion.div
+                    key={label}
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ repeat: Infinity, duration: 4 + delay * 0.3, ease: 'easeInOut', delay }}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-xs text-[11px] font-bold text-stone-800"
+                  >
+                    {icon}
+                    <span>{label}</span>
+                  </motion.div>
+                ))}
               </div>
 
-              {/* Hero Action Buttons */}
+              {/* CTA buttons */}
               <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Link
                   to="/shop"
@@ -332,7 +406,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Hero Image Carousel — desktop only */}
+            {/* Right hero image — desktop only */}
             <div className="lg:col-span-5 relative hidden lg:block">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-stone-200/90 bg-stone-100">
                 <AnimatePresence mode="wait">
@@ -347,9 +421,9 @@ export default function HomePage() {
                     className="absolute inset-0 w-full h-full object-cover object-center"
                   />
                 </AnimatePresence>
-
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none z-[1]" />
 
+                {/* Dot nav */}
                 <div className="absolute top-4 right-4 z-[2] flex items-center gap-1.5">
                   {heroImages.map((_, i) => (
                     <button
@@ -363,6 +437,7 @@ export default function HomePage() {
                   ))}
                 </div>
 
+                {/* Floating product pill */}
                 <motion.div
                   animate={{ y: [0, -6, 0] }}
                   transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
@@ -372,12 +447,8 @@ export default function HomePage() {
                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--color-accent)] block">
                       Featured Drop
                     </span>
-                    <h4 className="text-sm font-extrabold text-stone-950">
-                      Selvedge Raw Denim Chore Jacket
-                    </h4>
-                    <p className="text-xs text-stone-500 font-semibold mt-0.5">
-                      Rs. 6,850 &bull; Ready to Ship
-                    </p>
+                    <h4 className="text-sm font-extrabold text-stone-950">Selvedge Raw Denim Chore Jacket</h4>
+                    <p className="text-xs text-stone-500 font-semibold mt-0.5">Rs. 6,850 · Ready to Ship</p>
                   </div>
                   <Link
                     to="/shop"
@@ -392,15 +463,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. Editorial Scrollable Carousel (NEW — before Featured Arrivals) */}
-      <EditorialCarousel />
+      {/* ② Multi-Card Product Carousel (replaces editorial image slider) */}
+      <ProductCarousel products={featuredProducts} />
 
-      {/* 3. Featured Arrivals */}
+      {/* ③ Featured Arrivals grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 pb-3 border-b border-stone-200 gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
               <span className="text-xs font-bold uppercase tracking-widest text-amber-700">Latest Drop</span>
             </div>
             <h2 className="text-2xl sm:text-3xl text-stone-950 font-extrabold tracking-tight mt-0.5">
@@ -417,7 +488,6 @@ export default function HomePage() {
         </div>
 
         {featuredProducts.length > 0 ? (
-          /* Slightly smaller cards on mobile via reduced gap */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5">
             {featuredProducts.slice(0, 8).map((product, idx) => (
               <ProductCard key={product.id} product={product} index={idx} />
@@ -425,20 +495,18 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="text-center py-16 bg-white border border-stone-200 rounded-xl shadow-xs">
-            <p className="text-xs text-stone-500 font-normal">
-              No garments available in this collection yet. Check back soon.
-            </p>
+            <p className="text-xs text-stone-500">No garments available yet. Check back soon.</p>
           </div>
         )}
       </section>
 
-      {/* 4. Shop by Category Showcase */}
+      {/* ④ Shop by Category */}
       {categories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 pb-3 border-b border-stone-200 gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                <span className="w-2 h-2 rounded-full bg-purple-500" />
                 <span className="text-xs font-bold uppercase tracking-widest text-purple-700">Departments</span>
               </div>
               <h2 className="text-2xl sm:text-3xl text-stone-950 font-extrabold tracking-tight mt-0.5">
@@ -466,22 +534,19 @@ export default function HomePage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] uppercase tracking-wider font-extrabold ${theme.text} ${theme.bg} border ${theme.border} px-2 py-0.5 rounded-md`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
                         Department
                       </span>
                     </div>
-
                     <h3 className={`text-sm sm:text-base font-bold text-stone-950 ${theme.hoverText} transition-colors truncate`}>
                       {category.name}
                     </h3>
-
                     {category.description && (
                       <p className="text-[11px] sm:text-xs text-stone-500 line-clamp-2 font-normal leading-relaxed hidden xs:block">
                         {category.description}
                       </p>
                     )}
                   </div>
-
                   <div className={`pt-2 sm:pt-3 flex items-center justify-between text-[11px] sm:text-xs font-bold uppercase tracking-wider ${theme.text}`}>
                     <span>Explore</span>
                     <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
@@ -493,57 +558,34 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* 5. Brand Value Pillars */}
+      {/* ⑤ Brand Value Pillars */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-8 shadow-xs">
-          <div className="flex items-start gap-3.5 p-2">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0">
-              <Feather className="w-5 h-5" />
+          {[
+            { icon: <Feather className="w-5 h-5" />, color: 'blue', title: 'Pure Natural Fabrics', desc: '100% fine cottons, French flax linens, and breathable natural blends.' },
+            { icon: <Sparkles className="w-5 h-5" />, color: 'purple', title: 'Artisanal Tailoring', desc: 'Meticulous cuts designed for drape, silhouette, and longevity.' },
+            { icon: <Truck className="w-5 h-5" />, color: 'emerald', title: 'Express Shipping', desc: 'Complimentary nationwide delivery on orders over Rs. 5,000.' },
+            { icon: <RefreshCw className="w-5 h-5" />, color: 'amber', title: 'Doorstep Exchanges', desc: 'Hassle-free 7-day doorstep size replacement.' },
+          ].map(({ icon, color, title, desc }) => (
+            <div key={title} className="flex items-start gap-3.5 p-2">
+              <div className={`w-10 h-10 rounded-2xl bg-${color}-50 text-${color}-600 border border-${color}-200 flex items-center justify-center shrink-0`}>
+                {icon}
+              </div>
+              <div className="space-y-0.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">{title}</h3>
+                <p className="text-xs text-stone-500 font-normal leading-relaxed">{desc}</p>
+              </div>
             </div>
-            <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Pure Natural Fabrics</h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">100% fine cottons, French flax linens, and breathable natural blends.</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5 p-2">
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Artisanal Tailoring</h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">Meticulous cuts designed for drape, silhouette, and longevity.</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5 p-2">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0">
-              <Truck className="w-5 h-5" />
-            </div>
-            <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Express Shipping</h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">Complimentary nationwide delivery on orders over Rs. 5,000.</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5 p-2">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
-              <RefreshCw className="w-5 h-5" />
-            </div>
-            <div className="space-y-0.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-950">Doorstep Exchanges</h3>
-              <p className="text-xs text-stone-500 font-normal leading-relaxed">Hassle-free 7-day doorstep size replacement.</p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* 6. Brand Ethos Story Banner */}
+      {/* ⑥ Brand Ethos Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-[var(--color-primary)] text-white p-7 sm:p-12 lg:p-16 rounded-3xl grid md:grid-cols-2 gap-6 sm:gap-8 items-center shadow-xl">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-accent)]"></span>
+              <span className="w-2 h-2 rounded-full bg-[var(--color-accent)]" />
               <span className="text-xs uppercase tracking-widest text-[var(--color-accent-border)] font-bold">The Atelier Philosophy</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
@@ -553,21 +595,20 @@ export default function HomePage() {
           </div>
           <div className="space-y-4 text-xs sm:text-sm text-stone-300 font-normal leading-relaxed">
             <p>
-              We believe in wardrobe essentials that transcend fleeting trends. Each garment is drafted with thoughtful proportion, durable seams, and rich textural fabrics that grow softer with every wear.
+              We believe in wardrobe essentials that transcend fleeting trends. Each garment is drafted
+              with thoughtful proportion, durable seams, and rich textural fabrics that grow softer with every wear.
             </p>
-            <div>
-              <Link
-                to="/shop"
-                className="inline-block text-xs uppercase tracking-wider font-bold text-white border-b-2 border-[var(--color-accent)] pb-1 hover:text-[var(--color-accent-border)] transition"
-              >
-                Discover the Craft &rarr;
-              </Link>
-            </div>
+            <Link
+              to="/shop"
+              className="inline-block text-xs uppercase tracking-wider font-bold text-white border-b-2 border-[var(--color-accent)] pb-1 hover:text-[var(--color-accent-border)] transition"
+            >
+              Discover the Craft &rarr;
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 7. Minimalist Newsletter */}
+      {/* ⑦ Newsletter */}
       <section className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-4 text-center space-y-3">
         <span className="text-xs uppercase tracking-widest text-blue-600 font-bold">Stay Connected</span>
         <h2 className="text-2xl sm:text-3xl text-stone-950 font-extrabold tracking-tight">
@@ -576,7 +617,6 @@ export default function HomePage() {
         <p className="text-xs sm:text-sm text-stone-500 font-normal max-w-md mx-auto">
           Subscribe for private drop notifications, seasonal styling notes, and private archive sales.
         </p>
-
         <form onSubmit={handleNewsletterSubmit} className="pt-3 flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto">
           <input
             type="email"
