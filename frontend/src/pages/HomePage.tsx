@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard, { getCategoryTheme } from '../components/ProductCard';
 import Loader from '../components/Loader';
 import { productApi, categoryApi } from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Sparkles, ArrowRight, ShieldCheck, Feather, Truck, RefreshCw,
   ChevronLeft, ChevronRight, ShoppingBag as BagIcon
@@ -35,15 +36,22 @@ function CarouselProductCard({
   const theme = getCategoryTheme(product.categories?.name, index);
   const isOutOfStock = product.stock_quantity <= 0;
   const isLowStock = product.stock_quantity > 0 && product.stock_quantity <= 3;
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const handleAddToBag = (e: React.MouseEvent) => {
+  const handleAddToBag = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
+    if (!isAuthenticated) {
+      showToast('Please sign in to add garments to your bag.', 'info');
+      navigate('/login');
+      return;
+    }
     try {
-      addItem({ product_id: String(product.id), quantity: 1 });
+      await addToCart(product.id, 1);
       showToast(`"${product.name}" added to your bag.`, 'success');
     } catch {
       showToast('Could not add item. Please try again.', 'error');
