@@ -32,13 +32,17 @@ export function addToRecentlyViewed(item: WidgetItem) {
   } catch { /* noop */ }
 }
 
-function getRecentlyViewed(): WidgetItem[] {
+export function getRecentlyViewed(): WidgetItem[] {
   try {
     const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
   }
+}
+
+export function getRecentlyViewedCount(): number {
+  return getRecentlyViewed().length;
 }
 
 // --- Wishlist ---
@@ -49,6 +53,10 @@ export function getWishlist(): WidgetItem[] {
   } catch {
     return [];
   }
+}
+
+export function getWishlistCount(): number {
+  return getWishlist().length;
 }
 
 export function toggleWishlist(item: WidgetItem): boolean {
@@ -76,7 +84,7 @@ export function isInWishlist(id: string): boolean {
 }
 
 /* ================================================================
-   1. SOCIAL PROOF TOAST  (bottom-left, auto-cycling)
+   1. SOCIAL PROOF TOAST  (bottom-left, auto-cycling, hidden on mobile)
    ================================================================ */
 
 const socialProofData = [
@@ -150,7 +158,7 @@ function SocialProofToast() {
 }
 
 /* ================================================================
-   2. BACK TO TOP  (bottom-right, above AI pill, with scroll ring)
+   2. BACK TO TOP  (bottom-right, with scroll ring progress)
    ================================================================ */
 
 function BackToTopButton() {
@@ -178,7 +186,7 @@ function BackToTopButton() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.7 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-[5.5rem] right-6 z-35 w-10 h-10 bg-white border border-stone-200 rounded-full shadow-lg flex items-center justify-center text-stone-600 hover:text-stone-950 hover:shadow-xl transition-all group"
+          className="fixed bottom-6 right-4 sm:bottom-[5.5rem] sm:right-6 z-[35] w-10 h-10 bg-white border border-stone-200 rounded-full shadow-lg flex items-center justify-center text-stone-600 hover:text-stone-950 hover:shadow-xl transition-all group"
           aria-label="Back to top"
         >
           <svg className="absolute inset-0 w-10 h-10 -rotate-90" viewBox="0 0 40 40">
@@ -199,7 +207,7 @@ function BackToTopButton() {
 }
 
 /* ================================================================
-   3. PROMO / DISCOUNT RIBBON  (left edge, vertical)
+   3. PROMO / DISCOUNT RIBBON  (left edge, vertical — desktop only)
    ================================================================ */
 
 function PromoRibbon() {
@@ -228,7 +236,7 @@ function PromoRibbon() {
 }
 
 /* ================================================================
-   4. RIGHT-SIDE TOOLBAR
+   4. RIGHT-SIDE TOOLBAR (desktop only — md:flex, hidden on mobile)
    Contains: Recently Viewed, Wishlist, Size Finder, Currency
    ================================================================ */
 
@@ -252,7 +260,6 @@ function SizeFinderPanel() {
     else if (w < 100) idx = 4;
     else idx = 5;
 
-    // Height adjustment
     if (h > 185 && idx < 5) idx++;
     if (h < 165 && idx > 0) idx--;
 
@@ -344,14 +351,13 @@ function CurrencyPanel() {
   );
 }
 
-// --- Main Right-Side Toolbar ---
+// --- Main Right-Side Toolbar (Desktop only) ---
 function RightSideToolbar() {
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const [recentlyViewed, setRecentlyViewed] = useState<WidgetItem[]>(getRecentlyViewed());
   const [wishlist, setWishlist] = useState<WidgetItem[]>(getWishlist());
   const toolbarRef = useRef<HTMLDivElement>(null);
 
-  // Listen for storage events to refresh data
   useEffect(() => {
     const refreshRecent = () => setRecentlyViewed(getRecentlyViewed());
     const refreshWishlist = () => setWishlist(getWishlist());
@@ -363,7 +369,6 @@ function RightSideToolbar() {
     };
   }, []);
 
-  // Close panel on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
@@ -388,6 +393,7 @@ function RightSideToolbar() {
   ];
 
   return (
+    /* hidden on mobile — widgets are inside the mobile sidebar drawer instead */
     <div ref={toolbarRef} className="fixed right-0 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-start">
       {/* Expandable Panel */}
       <AnimatePresence>
