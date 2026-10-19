@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -285,7 +286,8 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    /* sticky wrapper — wraps BOTH the ticker AND the header so they scroll together then stick */
+    <>
+    {/* sticky wrapper — wraps BOTH the ticker AND the header so they scroll together then stick */}
     <div className="sticky top-0 z-40">
       {/* 1. Animated Continuous Running Marquee Ticker */}
       <div className="bg-[var(--color-primary)] text-stone-200 py-1.5 border-b border-stone-800 select-none overflow-hidden relative">
@@ -440,177 +442,184 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Slide-Over Drawer Navigation */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <div className="fixed inset-0 z-50 md:hidden flex">
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-xs"
-              />
-
-              {/* Drawer Content */}
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="relative w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-hidden"
-              >
-                {/* Drawer Header — sticky */}
-                <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-stone-100 bg-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="font-extrabold text-base tracking-wider uppercase text-stone-950">
-                        Garments Store
-                      </span>
-                      <span className="text-[9px] uppercase tracking-widest font-bold text-[var(--color-accent)]">
-                        Atelier Navigation
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-stone-900 rounded-lg"
-                      aria-label="Close menu"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Scrollable body */}
-                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-                  {/* Navigation Links */}
-                  <nav className="space-y-1">
-                    <Link
-                      to="/"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
-                        isActive('/') ? 'bg-stone-100 text-stone-950 font-extrabold' : 'text-stone-700 hover:bg-stone-50'
-                      }`}
-                    >
-                      <span>Home</span>
-                      <ArrowRight className="w-4 h-4 text-stone-400" />
-                    </Link>
-
-                    <Link
-                      to="/shop"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
-                        isActive('/shop') ? 'bg-stone-100 text-stone-950 font-extrabold' : 'text-stone-700 hover:bg-stone-50'
-                      }`}
-                    >
-                      <span>Shop Collection</span>
-                      <ArrowRight className="w-4 h-4 text-stone-400" />
-                    </Link>
-
-                    <Link
-                      to="/cart"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
-                        isActive('/cart') ? 'bg-stone-100 text-stone-950 font-extrabold' : 'text-stone-700 hover:bg-stone-50'
-                      }`}
-                    >
-                      <span>Shopping Bag ({cartCount})</span>
-                      <ArrowRight className="w-4 h-4 text-stone-400" />
-                    </Link>
-
-                    {isAdmin && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
-                          location.pathname.startsWith('/admin')
-                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                            : 'text-purple-700 hover:bg-purple-50'
-                        }`}
-                      >
-                        <span className="flex items-center space-x-1.5">
-                          <Shield className="w-4 h-4" />
-                          <span>Admin Portal</span>
-                        </span>
-                        <ArrowRight className="w-4 h-4 text-purple-400" />
-                      </Link>
-                    )}
-                  </nav>
-
-                  {/* Divider */}
-                  <div className="pt-2 pb-1">
-                    <div className="h-px bg-stone-100" />
-                  </div>
-
-                  {/* ── Mobile Widgets Expandable Section ── */}
-                  <div>
-                    <button
-                      onClick={() => setWidgetsOpen(!widgetsOpen)}
-                      className="w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm uppercase tracking-wider font-bold text-stone-600 hover:bg-stone-50 transition"
-                    >
-                      <span>Quick Tools</span>
-                      <motion.span animate={{ rotate: widgetsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                        <ChevronDown className="w-4 h-4 text-stone-400" />
-                      </motion.span>
-                    </button>
-
-                    <AnimatePresence>
-                      {widgetsOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.22, ease: 'easeOut' }}
-                          className="overflow-hidden"
-                        >
-                          <MobileWidgetTools onClose={() => setMobileMenuOpen(false)} />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                {/* Bottom Auth Section — sticky */}
-                <div className="flex-shrink-0 px-4 pb-6 pt-4 border-t border-stone-100 space-y-3">
-                  {isAuthenticated ? (
-                    <div className="space-y-3">
-                      <div className="bg-[var(--color-surface-subtle)] p-3.5 rounded-xl border border-stone-200/80">
-                        <p className="text-xs text-stone-500 font-normal">Signed in as</p>
-                        <p className="font-bold text-sm text-stone-950 truncate">{user?.name}</p>
-                        <p className="text-xs text-stone-500 truncate">{user?.email}</p>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full py-3.5 text-center text-xs uppercase tracking-wider font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <Link
-                        to="/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="text-center py-3.5 border border-stone-300 rounded-xl text-xs uppercase tracking-wider font-bold text-stone-900 bg-white shadow-2xs"
-                      >
-                        Sign In
-                      </Link>
-                      <Link
-                        to="/register"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="text-center py-3.5 bg-[var(--color-primary)] text-white rounded-xl text-xs uppercase tracking-wider font-bold shadow-xs"
-                      >
-                        Register
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+        {/* Mobile Slide-Over Drawer — rendered via Portal to escape sticky stacking context */}
       </header>
     </div>
+
+    {/* Portal: Mobile drawer rendered at document.body to guarantee z-index above everything */}
+    {createPortal(
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-[9999] md:hidden flex">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="relative w-[85%] max-w-sm bg-white h-full shadow-2xl flex flex-col z-[9999] overflow-hidden"
+            >
+              {/* Drawer Header */}
+              <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-stone-100 bg-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="font-extrabold text-base tracking-wider uppercase text-stone-950">
+                      Garments Store
+                    </span>
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-[var(--color-accent)]">
+                      Atelier Navigation
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-stone-900 rounded-lg"
+                    aria-label="Close menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+                {/* Navigation Links */}
+                <nav className="space-y-1">
+                  <Link
+                    to="/"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
+                      isActive('/') ? 'bg-stone-100 text-stone-950 font-extrabold' : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>Home</span>
+                    <ArrowRight className="w-4 h-4 text-stone-400" />
+                  </Link>
+
+                  <Link
+                    to="/shop"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
+                      isActive('/shop') ? 'bg-stone-100 text-stone-950 font-extrabold' : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>Shop Collection</span>
+                    <ArrowRight className="w-4 h-4 text-stone-400" />
+                  </Link>
+
+                  <Link
+                    to="/cart"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
+                      isActive('/cart') ? 'bg-stone-100 text-stone-950 font-extrabold' : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>Shopping Bag ({cartCount})</span>
+                    <ArrowRight className="w-4 h-4 text-stone-400" />
+                  </Link>
+
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center justify-between py-3.5 px-3 rounded-xl text-sm uppercase tracking-wider font-bold transition ${
+                        location.pathname.startsWith('/admin')
+                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                          : 'text-purple-700 hover:bg-purple-50'
+                      }`}
+                    >
+                      <span className="flex items-center space-x-1.5">
+                        <Shield className="w-4 h-4" />
+                        <span>Admin Portal</span>
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-purple-400" />
+                    </Link>
+                  )}
+                </nav>
+
+                {/* Divider */}
+                <div className="pt-2 pb-1">
+                  <div className="h-px bg-stone-100" />
+                </div>
+
+                {/* ── Mobile Widgets Expandable Section ── */}
+                <div>
+                  <button
+                    onClick={() => setWidgetsOpen(!widgetsOpen)}
+                    className="w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm uppercase tracking-wider font-bold text-stone-600 hover:bg-stone-50 transition"
+                  >
+                    <span>Quick Tools</span>
+                    <motion.span animate={{ rotate: widgetsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                      <ChevronDown className="w-4 h-4 text-stone-400" />
+                    </motion.span>
+                  </button>
+
+                  <AnimatePresence>
+                    {widgetsOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <MobileWidgetTools onClose={() => setMobileMenuOpen(false)} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Bottom Auth Section */}
+              <div className="flex-shrink-0 px-4 pb-6 pt-4 border-t border-stone-100 space-y-3">
+                {isAuthenticated ? (
+                  <div className="space-y-3">
+                    <div className="bg-[var(--color-surface-subtle)] p-3.5 rounded-xl border border-stone-200/80">
+                      <p className="text-xs text-stone-500 font-normal">Signed in as</p>
+                      <p className="font-bold text-sm text-stone-950 truncate">{user?.name}</p>
+                      <p className="text-xs text-stone-500 truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full py-3.5 text-center text-xs uppercase tracking-wider font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-center py-3.5 border border-stone-300 rounded-xl text-xs uppercase tracking-wider font-bold text-stone-900 bg-white shadow-2xs"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-center py-3.5 bg-[var(--color-primary)] text-white rounded-xl text-xs uppercase tracking-wider font-bold shadow-xs"
+                    >
+                      Register
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>,
+      document.body
+    )}
+
+    </>
   );
 }
