@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import Seo from '../components/Seo';
+import { getRedirectFromSearch, withRedirect } from '../utils/safeRedirect';
 
 export default function RegisterPage() {
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+  const redirectTo = getRedirectFromSearch(location.search);
 
   const [form, setForm] = useState({
     name: '',
@@ -36,7 +40,7 @@ export default function RegisterPage() {
     try {
       await signup(form.name, form.email, form.password);
       showToast('Welcome to Garments Store! Your account is active.', 'success');
-      navigate('/');
+      navigate(redirectTo);
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Registration failed. Please try again.';
       setError(msg);
@@ -46,7 +50,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center px-4 py-16">
+    <section className="min-h-[75vh] flex items-center justify-center px-4 py-16">
+      <Seo title="Create account" description="Create a Garments Store account to place orders, track shipments, and receive private drop notices." />
       <div className="bg-white border border-stone-200/90 rounded-2xl p-8 sm:p-10 w-full max-w-md space-y-6 shadow-xs">
         {/* Header */}
         <div className="text-center space-y-1.5">
@@ -150,11 +155,11 @@ export default function RegisterPage() {
 
         <div className="pt-3 border-t border-stone-100 text-center text-xs text-stone-500 font-normal">
           Already have an account?{' '}
-          <Link to="/login" className="text-[var(--color-accent)] font-bold hover:underline underline-offset-4">
+          <Link to={withRedirect('/login', redirectTo)} className="text-[var(--color-accent)] font-bold hover:underline underline-offset-4">
             Sign In
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

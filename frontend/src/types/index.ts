@@ -42,6 +42,12 @@ export interface OrderItem {
   products: Pick<Product, 'id' | 'name' | 'image_url'>;
 }
 
+export interface TrackingStep {
+  key: string;
+  label: string;
+  state?: 'complete' | 'current' | 'upcoming';
+}
+
 export interface Order {
   id: string;
   total_amount: number;
@@ -49,9 +55,31 @@ export interface Order {
   city: string;
   phone: string;
   status: string;
+  tracking_code?: string | null;
+  status_label?: string;
+  estimated_delivery_days?: number | null;
+  estimated_delivery_date?: string | null;
+  timeline?: TrackingStep[];
+  payment_method?: string;
   created_at?: string;
   order_items?: OrderItem[];
   users?: Pick<User, 'id' | 'name' | 'email'>;
+}
+
+export interface PublicTrackedOrder {
+  tracking_code: string;
+  status: string;
+  status_label: string;
+  estimated_delivery_days: number | null;
+  estimated_delivery_date: string | null;
+  timeline: TrackingStep[];
+  payment_method: string;
+  total_amount: number;
+  shipping_address: string;
+  city: string;
+  phone: string;
+  created_at?: string;
+  order_items?: OrderItem[];
 }
 
 // ===== API Response Types =====

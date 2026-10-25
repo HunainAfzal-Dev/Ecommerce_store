@@ -82,7 +82,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         {product.image_url ? (
           <img
             src={product.image_url}
-            alt={product.name}
+            alt={`${product.name}${product.categories?.name ? ` — ${product.categories.name}` : ''} garment`}
             className="w-full h-full object-cover object-center group-hover:scale-106 transition-transform duration-600 ease-out"
             loading="lazy"
           />

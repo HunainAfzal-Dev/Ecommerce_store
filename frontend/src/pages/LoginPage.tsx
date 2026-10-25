@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import Seo from '../components/Seo';
+import { getRedirectFromSearch, withRedirect } from '../utils/safeRedirect';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+  const redirectTo = getRedirectFromSearch(location.search);
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -24,7 +28,7 @@ export default function LoginPage() {
     try {
       await login(form.email, form.password);
       showToast('Welcome back to Garments Store.', 'success');
-      navigate('/');
+      navigate(redirectTo);
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Invalid email or password.';
       setError(msg);
@@ -34,7 +38,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center px-4 py-16">
+    <section className="min-h-[75vh] flex items-center justify-center px-4 py-16">
+      <Seo title="Sign in" description="Sign in to Garments Store to checkout, track orders, and manage your account." />
       <div className="bg-white border border-stone-200/90 rounded-2xl p-8 sm:p-10 w-full max-w-md space-y-6 shadow-xs">
         {/* Header */}
         <div className="text-center space-y-1.5">
@@ -66,7 +71,7 @@ export default function LoginPage() {
               value={form.email}
               onChange={handleChange}
               required
-              className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
+              className="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
               placeholder="name@example.com"
             />
           </div>
@@ -81,7 +86,7 @@ export default function LoginPage() {
               value={form.password}
               onChange={handleChange}
               required
-              className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
+              className="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[var(--color-primary)] transition"
               placeholder="••••••••"
             />
           </div>
@@ -106,11 +111,11 @@ export default function LoginPage() {
 
         <div className="pt-3 border-t border-stone-100 text-center text-xs text-stone-500 font-normal">
           Don't have an account?{' '}
-          <Link to="/register" className="text-[var(--color-accent)] font-bold hover:underline underline-offset-4">
+          <Link to={withRedirect('/register', redirectTo)} className="text-[var(--color-accent)] font-bold hover:underline underline-offset-4">
             Create Account
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

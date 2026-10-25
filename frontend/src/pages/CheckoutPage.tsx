@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { orderApi } from '../api/client';
 import { useToast } from '../context/ToastContext';
+import Seo from '../components/Seo';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -32,7 +33,8 @@ export default function CheckoutPage() {
       const response = await orderApi.create(form);
       await clearCart();
       showToast('Order placed successfully!', 'success');
-      navigate(`/order-confirmation/${response.data.data.order.id}`);
+      const placed = response.data.data.order;
+      navigate(`/order-confirmation/${placed.id}`, { state: { trackingCode: placed.tracking_code } });
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Failed to place order';
       setError(msg);
@@ -66,7 +68,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <Seo title="Checkout" description="Enter delivery details and place your Garments Store order with cash on delivery." />
       {/* Header */}
       <div className="mb-8 pb-4 border-b border-stone-200">
         <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)]">
@@ -138,6 +141,10 @@ export default function CheckoutPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+              Payment is Cash on Delivery (COD). Please keep the exact amount ready when your order arrives.
             </div>
 
             <div className="pt-4 border-t border-stone-100">
@@ -221,6 +228,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

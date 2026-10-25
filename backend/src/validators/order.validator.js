@@ -37,7 +37,25 @@ phone: Joi.string()
         })
 });
 
+const updateOrderStatusSchema = Joi.object({
+    status: Joi.string()
+        .valid(
+            'pending',
+            'processing',
+            'shipped',
+            'out_for_delivery',
+            'delivered',
+            'cancelled'
+        )
+        .required()
+        .messages({
+            'any.only': 'Invalid order status',
+            'any.required': 'Status is required'
+        })
+});
+
 module.exports = {
-    createOrderSchema
+    createOrderSchema,
+    updateOrderStatusSchema
 };
 

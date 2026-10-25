@@ -1,9 +1,9 @@
-import React from 'react';
-import { Routes, Route, Navigate, Link } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import { Routes, Route, Link } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
 import FloatingWidgets from './components/FloatingWidgets';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -12,25 +12,13 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import TrackOrderPage from './pages/TrackOrderPage';
+import AccountPage from './pages/AccountPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
-
-// Protected Route for Authenticated Users
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-}
-
-// Protected Route for Admin Users
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isAdmin } = useAuth();
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
-  return <>{children}</>;
-}
 
 function App() {
   return (
@@ -46,13 +34,15 @@ function App() {
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/track" element={<TrackOrderPage />} />
+            <Route path="/cart" element={<CartPage />} />
 
             {/* Authenticated Customer Routes */}
             <Route
-              path="/cart"
+              path="/account"
               element={
                 <ProtectedRoute>
-                  <CartPage />
+                  <AccountPage />
                 </ProtectedRoute>
               }
             />
@@ -185,6 +175,12 @@ function App() {
                   Client Care
                 </h3>
                 <ul className="space-y-2 text-xs text-stone-400 font-normal">
+                  <li>
+                    <Link to="/track" className="hover:text-stone-100 transition">Track an Order</Link>
+                  </li>
+                  <li>
+                    <Link to="/account" className="hover:text-stone-100 transition">Your Orders</Link>
+                  </li>
                   <li>
                     <span className="hover:text-white cursor-pointer transition">Complimentary Shipping</span>
                   </li>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import Loader from '../components/Loader';
+import Seo from '../components/Seo';
 import { productApi, categoryApi } from '../api/client';
 import type { Product, Category } from '../types';
 
@@ -56,7 +57,11 @@ export default function ShopPage() {
   const activeCategoryName = categories.find((c) => c.id === activeCategory)?.name;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+      <Seo
+        title={activeCategoryName ? `${activeCategoryName} — Shop` : 'Shop all garments'}
+        description={`Browse ${activeCategoryName || 'our complete collection of'} premium contemporary garments. Free shipping on orders over Rs. 5,000. Cash on delivery nationwide.`}
+      />
       {/* Page Header */}
       <div className="mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-stone-200">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -156,6 +161,6 @@ export default function ShopPage() {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
