@@ -12,6 +12,7 @@ import {
   ChevronLeft, ChevronRight, ShoppingBag as BagIcon
 } from 'lucide-react';
 import type { Product, Category } from '../types';
+import Seo from '../components/Seo';
 
 // Fallback editorial images used in the right-column desktop hero
 const editorialImages = [
@@ -46,8 +47,8 @@ function CarouselProductCard({
     e.stopPropagation();
     if (isOutOfStock) return;
     if (!isAuthenticated) {
-      showToast('Please sign in to add garments to your bag.', 'info');
-      navigate('/login');
+      showToast('Please sign in to add garments to your bag, then continue to checkout.', 'info');
+      navigate(loginPath(`/product/${product.id}`));
       return;
     }
     try {
@@ -72,7 +73,7 @@ function CarouselProductCard({
         {product.image_url ? (
           <img
             src={product.image_url}
-            alt={product.name}
+            alt={`${product.name}${product.categories?.name ? ` — ${product.categories.name}` : ''} garment`}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
             loading="lazy"
           />
@@ -349,6 +350,10 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10 sm:space-y-16 overflow-hidden pb-4">
+      <Seo
+        title="Garments Store — Contemporary Minimal Apparel"
+        description="Discover curated contemporary garments crafted with premium fabrics and modern silhouettes. Free delivery over Rs. 5,000. Cash on delivery nationwide."
+      />
 
       {/* ① Editorial Hero */}
       <section className="relative bg-[var(--color-surface-subtle)] border-b border-stone-200/90 overflow-hidden">

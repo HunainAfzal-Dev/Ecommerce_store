@@ -10,6 +10,8 @@ import { getCategoryTheme } from '../components/ProductCard';
 import { addToRecentlyViewed, toggleWishlist, isInWishlist, LiveViewerBadge } from '../components/FloatingWidgets';
 import { Sparkles, Check, Heart } from 'lucide-react';
 import type { Product } from '../types';
+import Seo from '../components/Seo';
+import { loginPath } from '../utils/safeRedirect';
 
 const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
 const colorOptions = [
@@ -66,8 +68,8 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      showToast('Please sign in to add garments to your bag.', 'info');
-      navigate('/login');
+      showToast('Please sign in to add garments to your bag, then continue to checkout.', 'info');
+      navigate(loginPath(`/product/${product.id}`));
       return;
     }
 
@@ -119,7 +121,13 @@ export default function ProductDetailPage() {
   const categoryTheme = getCategoryTheme(product.categories?.name);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 pb-24 sm:pb-12">
+    <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 pb-24 sm:pb-12">
+      <Seo
+        title={product.name}
+        description={product.description || `Shop ${product.name} from the Garments Store ready-to-wear collection.`}
+        image={product.image_url}
+        type="product"
+      />
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center space-x-2 text-xs font-medium text-stone-400 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
         <Link to="/" className="hover:text-stone-900 transition shrink-0">Home</Link>
@@ -148,7 +156,7 @@ export default function ProductDetailPage() {
             {product.image_url ? (
               <img
                 src={product.image_url}
-                alt={product.name}
+                alt={`${product.name} garment product photo`}
                 className="w-full h-full object-cover object-center"
               />
             ) : (
@@ -174,11 +182,10 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={handleWishlistToggle}
-              className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md z-10 ${
-                wishlisted
+              className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md z-10 ${wishlisted
                   ? 'bg-rose-500 text-white'
                   : 'bg-white/90 backdrop-blur-md text-stone-500 hover:text-rose-500'
-              }`}
+                }`}
               title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <Heart className={`w-4.5 h-4.5 ${wishlisted ? 'fill-current' : ''}`} />
@@ -249,11 +256,10 @@ export default function ProductDetailPage() {
                   key={sz}
                   type="button"
                   onClick={() => setSelectedSize(sz)}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    selectedSize === sz
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${selectedSize === sz
                       ? 'bg-[var(--color-primary)] text-white shadow-xs font-extrabold'
                       : 'bg-stone-50 border border-stone-200 text-stone-700 hover:border-stone-400'
-                  }`}
+                    }`}
                 >
                   {sz}
                 </button>
@@ -273,11 +279,10 @@ export default function ProductDetailPage() {
                   key={c.name}
                   type="button"
                   onClick={() => setSelectedColor(c.name)}
-                  className={`w-7 h-7 rounded-full ${c.bgClass} transition-all flex items-center justify-center ${
-                    selectedColor === c.name
+                  className={`w-7 h-7 rounded-full ${c.bgClass} transition-all flex items-center justify-center ${selectedColor === c.name
                       ? 'ring-2 ring-[var(--color-primary)] ring-offset-2 scale-110'
                       : 'hover:scale-105'
-                  }`}
+                    }`}
                   title={c.name}
                 >
                   {selectedColor === c.name && <Check className="w-3.5 h-3.5 text-white" />}
@@ -337,11 +342,10 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={handleWishlistToggle}
-                  className={`w-[52px] min-h-[52px] rounded-2xl border-2 flex items-center justify-center transition-all ${
-                    wishlisted
+                  className={`w-[52px] min-h-[52px] rounded-2xl border-2 flex items-center justify-center transition-all ${wishlisted
                       ? 'bg-rose-50 border-rose-300 text-rose-500'
                       : 'bg-white border-stone-200 text-stone-400 hover:text-rose-500 hover:border-rose-200'
-                  }`}
+                    }`}
                   title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
                 >
                   <Heart className={`w-5 h-5 ${wishlisted ? 'fill-current' : ''}`} />
@@ -355,9 +359,8 @@ export default function ProductDetailPage() {
             <div className="flex border-b border-stone-200 text-xs font-bold gap-4 sm:gap-6 overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setActiveTab('details')}
-                className={`py-3 transition-colors relative shrink-0 ${
-                  activeTab === 'details' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
-                }`}
+                className={`py-3 transition-colors relative shrink-0 ${activeTab === 'details' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
+                  }`}
               >
                 Details & Fit
                 {activeTab === 'details' && (
@@ -366,9 +369,8 @@ export default function ProductDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab('care')}
-                className={`py-3 transition-colors relative shrink-0 ${
-                  activeTab === 'care' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
-                }`}
+                className={`py-3 transition-colors relative shrink-0 ${activeTab === 'care' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
+                  }`}
               >
                 Fabric & Care
                 {activeTab === 'care' && (
@@ -377,9 +379,8 @@ export default function ProductDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab('shipping')}
-                className={`py-3 transition-colors relative shrink-0 ${
-                  activeTab === 'shipping' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
-                }`}
+                className={`py-3 transition-colors relative shrink-0 ${activeTab === 'shipping' ? 'text-stone-950 font-bold' : 'text-stone-400 hover:text-stone-700'
+                  }`}
               >
                 Delivery & Returns
                 {activeTab === 'shipping' && (
@@ -424,9 +425,8 @@ export default function ProductDetailPage() {
           <button
             type="button"
             onClick={handleWishlistToggle}
-            className={`w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 ${
-              wishlisted ? 'bg-rose-50 border-rose-300 text-rose-500' : 'bg-white border-stone-200 text-stone-400'
-            }`}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 ${wishlisted ? 'bg-rose-50 border-rose-300 text-rose-500' : 'bg-white border-stone-200 text-stone-400'
+              }`}
           >
             <Heart className={`w-4 h-4 ${wishlisted ? 'fill-current' : ''}`} />
           </button>
@@ -445,6 +445,6 @@ export default function ProductDetailPage() {
           </button>
         </div>
       )}
-    </div>
+    </article>
   );
 }

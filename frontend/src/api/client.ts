@@ -93,6 +93,7 @@ export const orderApi = {
   getMyOrders: () => api.get('/orders/my-orders'),
   getAll: () => api.get('/orders'),
   getById: (id: string) => api.get(`/orders/${id}`),
+  track: (code: string) => api.get(`/orders/track/${encodeURIComponent(code.replace(/^#/, ''))}`),
   updateStatus: (id: string, status: string) =>
     api.put(`/orders/${id}/status`, { status })
 };

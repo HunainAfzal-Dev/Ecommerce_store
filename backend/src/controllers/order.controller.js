@@ -72,11 +72,25 @@ const updateOrderStatus = catchAsync(async (req, res, next) => {
     });
 });
 
+/**
+ * 📦 GET /api/orders/track/:code - Public tracking lookup
+ */
+const trackOrder = catchAsync(async (req, res, next) => {
+    const { code } = req.params;
+    const order = await orderService.getOrderByTrackingCode(code);
+
+    res.status(200).json({
+        status: 'Success',
+        data: { order }
+    });
+});
+
 module.exports = {
     createOrder,
     getMyOrders,
     getAllOrders,
     getOrderById,
-    updateOrderStatus
+    updateOrderStatus,
+    trackOrder
 };
 

@@ -1,6 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import Seo from '../components/Seo';
+import { loginPath } from '../utils/safeRedirect';
 
 export default function CartPage() {
   const {
@@ -11,6 +14,7 @@ export default function CartPage() {
     removeFromCart,
     clearCart
   } = useCart();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -24,9 +28,47 @@ export default function CartPage() {
     showToast('Shopping bag cleared.', 'info');
   };
 
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      showToast('Please sign in to proceed to checkout.', 'info');
+      navigate(loginPath('/checkout'));
+      return;
+    }
+    navigate('/checkout');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <section className="max-w-2xl mx-auto px-4 py-16 sm:py-24 text-center space-y-4">
+        <Seo title="Shopping bag" description="Review garments in your shopping bag before checkout." />
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 tracking-tight">
+          Sign in to view your bag
+        </h1>
+        <p className="text-xs text-stone-500 font-normal max-w-sm mx-auto">
+          Browse freely, then sign in when you are ready to checkout or place an order.
+        </p>
+        <div className="pt-4 flex flex-col sm:flex-row gap-2.5 justify-center">
+          <Link
+            to={loginPath('/cart')}
+            className="inline-flex min-h-[48px] items-center justify-center bg-[var(--color-primary)] text-white text-xs uppercase tracking-wider font-bold px-8 rounded-xl"
+          >
+            Sign In
+          </Link>
+          <Link
+            to="/shop"
+            className="inline-flex min-h-[48px] items-center justify-center border border-stone-300 text-stone-900 text-xs uppercase tracking-wider font-bold px-8 rounded-xl"
+          >
+            Continue browsing
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+        <Seo title="Shopping bag" />
         <p className="text-xs uppercase tracking-wider text-stone-500 font-semibold animate-pulse">
           Reviewing your bag...
         </p>
@@ -36,7 +78,8 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 sm:py-24 text-center space-y-4">
+      <section className="max-w-2xl mx-auto px-4 py-16 sm:py-24 text-center space-y-4">
+        <Seo title="Shopping bag" description="Your Garments Store shopping bag is empty. Discover the latest collection." />
         <svg className="w-16 h-16 mx-auto text-stone-300 stroke-[1.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
         </svg>
@@ -54,12 +97,13 @@ export default function CartPage() {
             Explore Collection
           </Link>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+      <Seo title="Shopping bag" description="Review your selected garments and proceed to cash on delivery checkout." />
       {/* Header */}
       <div className="mb-6 sm:mb-8 pb-3 sm:pb-4 border-b border-stone-200 flex items-baseline justify-between">
         <div>
@@ -191,7 +235,7 @@ export default function CartPage() {
             </div>
 
             <button
-              onClick={() => navigate('/checkout')}
+              onClick={handleCheckout}
               className="w-full min-h-[48px] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-[0.99] text-white text-xs uppercase tracking-wider font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
             >
               <span>Proceed to Checkout &rarr;</span>
@@ -208,6 +252,6 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

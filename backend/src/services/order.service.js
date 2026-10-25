@@ -6,6 +6,58 @@
 
 const supabase = require('../config/supabase');
 const AppError = require('../utils/AppError');
+const { sendOrderConfirmationEmail } = require('../utils/email');
+const {
+    generateTrackingCode,
+    normalizeTrackingCode,
+    ALLOWED_STATUSES,
+    withTrackingMeta
+} = require('../utils/orderTracking');
+
+const ORDER_DETAIL_SELECT = `
+            id,
+            user_id,
+            total_amount,
+            shipping_address,
+            city,
+            phone,
+            status,
+            tracking_code,
+            created_at,
+            users (
+                id,
+                name,
+                email
+            ),
+            order_items (
+                id,
+                quantity,
+                price,
+                products (
+                    id,
+                    name,
+                    image_url
+                )
+            )
+        `;
+
+const generateUniqueTrackingCode = async () => {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+        const code = generateTrackingCode();
+        const { data, error } = await supabase
+            .from('orders')
+            .select('id')
+            .eq('tracking_code', code)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Tracking code lookup error:', error.message);
+            return code;
+        }
+        if (!data) return code;
+    }
+    return `ORD-${Date.now().toString(36).slice(-6).toUpperCase()}`;
+};
 
 /**
  * 📦 Place a new order
@@ -62,6 +114,8 @@ const createOrder = async (userId, orderData) => {
         totalAmount += product.price * item.quantity;
     }
 
+    const trackingCode = await generateUniqueTrackingCode();
+
     // ===== 3️⃣ Create order =====
     const { data: newOrder, error: orderError } = await supabase
         .from('orders')
@@ -72,15 +126,21 @@ const createOrder = async (userId, orderData) => {
                 shipping_address,
                 city,
                 phone,
-                status: 'pending'
+                status: 'pending',
+                tracking_code: trackingCode
             }
         ])
         .select()
         .single();
 
     if (orderError) {
-        console.error('Order Insert Error:', orderError.message);
-        throw new AppError('Failed to place order. Please try again.', 500);
+        console.error('Order Insert Error:', {
+            message: orderError.message,
+            code: orderError.code,
+            details: orderError.details,
+            hint: orderError.hint,
+        });
+        throw new AppError(`Failed to place order: ${orderError.message}`, 500);
     }
 
     // ===== 4️⃣ Create order_items + decrement stock =====
@@ -123,7 +183,55 @@ const createOrder = async (userId, orderData) => {
         .delete()
         .eq('user_id', userId);
 
-    return newOrder;
+    const { data: customer } = await supabase
+        .from('users')
+        .select('name, email')
+        .eq('id', userId)
+        .maybeSingle();
+
+    const orderItemsForResponse = cartItems.map((item, index) => ({
+        id: `temp-${index}`,
+        quantity: item.quantity,
+        price: item.products.price,
+        products: {
+            id: item.products.id,
+            name: item.products.name,
+            image_url: item.products.image_url || null
+        }
+    }));
+
+    const hydratedOrder = withTrackingMeta({
+        ...newOrder,
+        tracking_code: trackingCode,
+        order_items: orderItemsForResponse,
+        users: customer
+            ? { id: userId, name: customer.name, email: customer.email }
+            : undefined
+    });
+
+    if (customer?.email) {
+        sendOrderConfirmationEmail({
+            to: customer.email,
+            customerName: customer.name,
+            trackingCode,
+            items: cartItems.map((item) => ({
+                name: item.products.name,
+                quantity: item.quantity,
+                price: item.products.price
+            })),
+            totalAmount: newOrder.total_amount,
+            shippingAddress: shipping_address,
+            city,
+            phone,
+            estimatedDeliveryDate: hydratedOrder.estimated_delivery_date,
+            estimatedDeliveryDays: hydratedOrder.estimated_delivery_days,
+            frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+        }).catch((emailError) => {
+            console.error('Order confirmation email failed:', emailError.message);
+        });
+    }
+
+    return hydratedOrder;
 };
 
 /**
@@ -139,6 +247,7 @@ const getOrdersByUser = async (userId) => {
             city,
             phone,
             status,
+            tracking_code,
             created_at,
             order_items (
                 id,
@@ -158,7 +267,7 @@ const getOrdersByUser = async (userId) => {
         throw new AppError(error.message, 400);
     }
 
-    return orders;
+    return (orders || []).map(withTrackingMeta);
 };
 
 /**
@@ -167,37 +276,14 @@ const getOrdersByUser = async (userId) => {
 const getAllOrders = async () => {
     const { data: orders, error } = await supabase
         .from('orders')
-        .select(`
-            id,
-            total_amount,
-            shipping_address,
-            city,
-            phone,
-            status,
-            created_at,
-            users (
-                id,
-                name,
-                email
-            ),
-            order_items (
-                id,
-                quantity,
-                price,
-                products (
-                    id,
-                    name,
-                    image_url
-                )
-            )
-        `)
+        .select(ORDER_DETAIL_SELECT)
         .order('created_at', { ascending: false });
 
     if (error) {
         throw new AppError(error.message, 400);
     }
 
-    return orders;
+    return (orders || []).map(withTrackingMeta);
 };
 
 /**
@@ -206,31 +292,7 @@ const getAllOrders = async () => {
 const getOrderById = async (orderId, user) => {
     const { data: order, error } = await supabase
         .from('orders')
-.select(`
-            id,
-            user_id,
-            total_amount,
-            shipping_address,
-            city,
-            phone,
-            status,
-            created_at,
-            users (
-                id,
-                name,
-                email
-            ),
-            order_items (
-                id,
-                quantity,
-                price,
-                products (
-                    id,
-                    name,
-                    image_url
-                )
-            )
-        `)
+        .select(ORDER_DETAIL_SELECT)
         .eq('id', orderId)
         .single();
 
@@ -249,13 +311,61 @@ const getOrderById = async (orderId, user) => {
         );
     }
 
-    return order;
+    return withTrackingMeta(order);
+};
+
+/**
+ * 📦 Public tracking lookup by ORD-XXXXXX (no auth)
+ */
+const getOrderByTrackingCode = async (rawCode) => {
+    const trackingCode = normalizeTrackingCode(rawCode);
+    if (!trackingCode || trackingCode.length < 6) {
+        throw new AppError('Please enter a valid order tracking ID.', 400);
+    }
+
+    const { data: order, error } = await supabase
+        .from('orders')
+        .select(ORDER_DETAIL_SELECT)
+        .eq('tracking_code', trackingCode)
+        .maybeSingle();
+
+    if (error) {
+        throw new AppError(error.message, 400);
+    }
+
+    if (!order) {
+        throw new AppError('No order found for that tracking ID.', 404);
+    }
+
+    const hydrated = withTrackingMeta(order);
+    return {
+        tracking_code: hydrated.tracking_code,
+        status: hydrated.status,
+        status_label: hydrated.status_label,
+        estimated_delivery_days: hydrated.estimated_delivery_days,
+        estimated_delivery_date: hydrated.estimated_delivery_date,
+        timeline: hydrated.timeline,
+        payment_method: hydrated.payment_method,
+        total_amount: hydrated.total_amount,
+        shipping_address: hydrated.shipping_address,
+        city: hydrated.city,
+        phone: hydrated.phone,
+        created_at: hydrated.created_at,
+        order_items: hydrated.order_items
+    };
 };
 
 /**
  * 📦 Update order status (admin)
  */
 const updateOrderStatus = async (orderId, status) => {
+    if (!ALLOWED_STATUSES.includes(status)) {
+        throw new AppError(
+            `Invalid status. Allowed: ${ALLOWED_STATUSES.join(', ')}.`,
+            400
+        );
+    }
+
     // ===== 1️⃣ Check order exists =====
     const { data: existingOrder, error: fetchError } = await supabase
         .from('orders')
@@ -272,13 +382,13 @@ const updateOrderStatus = async (orderId, status) => {
         .from('orders')
         .update({ status })
         .eq('id', orderId)
-        .select();
+        .select(ORDER_DETAIL_SELECT);
 
     if (updateError) {
         throw new AppError(updateError.message, 400);
     }
 
-    return updatedOrder[0];
+    return withTrackingMeta(updatedOrder[0]);
 };
 
 module.exports = {
@@ -286,6 +396,7 @@ module.exports = {
     getOrdersByUser,
     getAllOrders,
     getOrderById,
+    getOrderByTrackingCode,
     updateOrderStatus
 };
 

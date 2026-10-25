@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
     city TEXT NOT NULL,
     phone TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending'
-        CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
+        CHECK (status IN ('pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled')),
+    tracking_code TEXT UNIQUE,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -105,6 +106,7 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_id)
 CREATE INDEX IF NOT EXISTS idx_cart_items_user ON public.cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_cart_items_product ON public.cart_items(product_id);
 CREATE INDEX IF NOT EXISTS idx_orders_user ON public.orders(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_tracking_code ON public.orders(tracking_code);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON public.order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_product ON public.order_items(product_id);
 

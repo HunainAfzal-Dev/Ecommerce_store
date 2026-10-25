@@ -9,12 +9,19 @@ const express = require('express');
 const router = express.Router();
 
 const orderController = require('../controllers/order.controller');
-const { createOrderSchema } = require('../validators/order.validator');
+const { createOrderSchema, updateOrderStatusSchema } = require('../validators/order.validator');
 const validate = require('../middleware/validate.middleware');
 const authMiddleware = require('../middleware/auth.middleware');
 const adminMiddleware = require('../middleware/admin.middleware');
 
-// All order routes require login
+/**
+ * @route   GET /api/orders/track/:code
+ * @desc    Public order tracking by ORD-XXXXXX
+ * @access  Public
+ */
+router.get('/track/:code', orderController.trackOrder);
+
+// Remaining order routes require login
 router.use(authMiddleware);
 
 /**
@@ -59,6 +66,7 @@ router.get('/', orderController.getAllOrders);
  */
 router.put(
     '/:id/status',
+    validate(updateOrderStatusSchema, 'body'),
     orderController.updateOrderStatus
 );
 
