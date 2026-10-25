@@ -7,6 +7,7 @@ import { productApi, categoryApi } from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { loginPath } from '../utils/safeRedirect';
 import {
   Sparkles, ArrowRight, ShieldCheck, Feather, Truck, RefreshCw,
   ChevronLeft, ChevronRight, ShoppingBag as BagIcon
@@ -96,13 +97,12 @@ function CarouselProductCard({
 
         {/* Stock badge — top right */}
         <span
-          className={`absolute top-2 right-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md shadow-xs ${
-            isOutOfStock
+          className={`absolute top-2 right-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md shadow-xs ${isOutOfStock
               ? 'bg-red-50 text-red-600 border border-red-200'
               : isLowStock
-              ? 'bg-amber-50 text-amber-700 border border-amber-200'
-              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-          }`}
+                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+            }`}
         >
           {isOutOfStock ? 'Sold Out' : isLowStock ? `${product.stock_quantity} left` : 'In Stock'}
         </span>
@@ -442,9 +442,8 @@ export default function HomePage() {
                     <button
                       key={i}
                       onClick={() => setHeroIdx(i)}
-                      className={`rounded-full transition-all ${
-                        i === heroIdx ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
-                      }`}
+                      className={`rounded-full transition-all ${i === heroIdx ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
+                        }`}
                       aria-label={`Show image ${i + 1}`}
                     />
                   ))}
